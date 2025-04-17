@@ -7,7 +7,7 @@
 
   *ilustrasi program* 
   
-   ** admin, yang bisa dilakukan role admin : **
+   **admin, yang bisa dilakukan role admin :**
     - bisa melakukan registrasi dan login
     - bisa mendapatkan list data pengguna/user
     - bisa melakukan penghapusan pengguna/user
@@ -16,7 +16,7 @@
     - bisa melakukan status reject untuk penolakan saat pelelangan
   
 
-   ** seller, yang bisa dilakukan role seller : **
+   **seller, yang bisa dilakukan role seller :**
     - bisa melakukan registrasi, dengan syarat memasukan token dari role admin pada auth
     - bisa melakukan login seller, untuk mendapatkan token
     - bisa melakukan reset password, dengan memasukan token seller ke auth
@@ -24,7 +24,7 @@
     - bisa melakukan create auction dengan role seller
   
 
-   ** buyer, yang bisa dilakukan role buyer : **
+   **buyer, yang bisa dilakukan role buyer :**
     - bisa melakukan registrasi, dengan syarat memasukan token dari role admin pada auth
     - bisa melakukan login buyer, untuk mendapatkan token
     - bisa melakukan reset password, dengan memasukan token buyer ke auth
