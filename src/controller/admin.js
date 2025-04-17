@@ -1,13 +1,12 @@
-import express from "express";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import { adminModel } from "../models/adminModel.js";
 
-const router = express.Router();
+
+
 
 // Login
-router.post("/login", async (req, res) => {
-
+export async function login(req, res) {
   try {
     const { email, password } = req.body;
 
@@ -40,11 +39,11 @@ router.post("/login", async (req, res) => {
     console.error("Gagal mendaftar:", error.message);
     res.status(500).json({ message: "Terjadi kesalahan server" });
   }
-});
+
+}
 
 // Daftar akun
-router.post("/daftar", async (req, res) => {
-
+export async function registrasi(req, res) {
   try {
     const { name, email, password } = req.body;
 
@@ -63,7 +62,7 @@ router.post("/daftar", async (req, res) => {
       const salt = await bcrypt.genSalt();
       const hash = await bcrypt.hash(password, salt);
 
-      await akunModel.create(
+      await adminModel.create(
         {
           name,
           email,
@@ -78,11 +77,30 @@ router.post("/daftar", async (req, res) => {
     console.error("Gagal mendaftar:", error.message);
     res.status(500).json({ message: "Terjadi kesalahan server" });
   }
-});
 
+}
+
+export async function listUser(req, res){
+
+}
+
+export async function deletUser(req, res){
+
+}
+
+export async function listUserByStatus(req, res){
+
+}
+
+export async function statusToApproved(req, res){
+
+}
+
+export async function statusToReject(req, res){
+
+}
 // Cek Email Endpoint
-router.post("/cek", async (req, res) => {
-
+export async function cekEmail(req, res){
   try {
 
     const { email } = req.body;
@@ -113,7 +131,7 @@ router.post("/cek", async (req, res) => {
     res.status(500).json({ message: "Terjadi kesalahan server" });
   }
 
-});
+}
 
 // Lupa password
 // router.put("/forgout", async (req, res) => {
@@ -149,8 +167,7 @@ router.post("/cek", async (req, res) => {
 // });
 
 // Logout
-router.post("/logout", (_req, res) => {
+export async function logout(_req, res){
   res.clearCookie("dataJwt").send("Logout berhasil");
-});
+}
 
-export default router;
