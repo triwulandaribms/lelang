@@ -19,6 +19,11 @@ export const buyerModel = sequelize.define("Buyer", {
     password:{
         type: DataTypes.STRING,
         allowNull: false
+    },
+    role:{
+        type: DataTypes.STRING,
+        allowNull: false,
+        defaultValue: "buyer",
     }
 },
 {

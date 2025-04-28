@@ -2,9 +2,6 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import { adminModel } from "../models/adminModel.js";
 
-
-
-
 // Login
 export async function login(req, res) {
   try {
@@ -12,7 +9,7 @@ export async function login(req, res) {
 
     const cekEmail = await adminModel.findOne({
       where: { email },
-      attributes: ['userId', 'name', 'password', 'email']
+      attributes: ['userId', 'name', 'password', 'email', 'role']
     });
 
     if (!cekEmail) {
@@ -28,12 +25,13 @@ export async function login(req, res) {
     const dataJwt = jwt.sign({
       userId: cekEmail.userId,
       name: cekEmail.name,
-      email: cekEmail.email
+      email: cekEmail.email,
+      role: cekEmail.role,
     },process.env.SECRET_KEY);
 
     // console.log(dataJwt);
-    res.cookie("dataJwt", dataJwt);
-    res.status(200).json({ message: "Berhasil login", dataJwt});
+    // res.cookie("dataJwt", dataJwt);
+    res.status(200).json({ message: "Berhasil login", token: `${dataJwt}`});
 
   } catch (error) {
     console.error("Gagal mendaftar:", error.message);
@@ -47,7 +45,7 @@ export async function registrasi(req, res) {
   try {
     const { name, email, password } = req.body;
 
-    const data = await adminModel.findAll({ attributes: ['email', 'password'] });
+    const data = await adminModel.findAll({ attributes: ['name', 'email', 'password'] });
 
     if (data.some(akun => akun.email == email)) {
       res.status(201).json({ message: "email sudah pernah untuk mendaftar" });

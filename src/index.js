@@ -27,12 +27,7 @@ import {
     listAuctionByApproved,
     createBidding
   } from "./controller/buyer.js";
-// import {
-//   seeUser, 
-//   addUser, 
-//   getUserByEmail, 
-//   updateUserByEmail} from "./controller/users.js";
-import auth from "./middleware/auth.js";
+import authMiddleware from "./middleware/auth.js";
 
 const app = express();
 app.use(express.json());
@@ -50,26 +45,22 @@ router.put("/status-reject", statusToReject);
 router.post("/cekEmail", cekEmail);
 router.post("/logout", logout);
 
-router.use(auth); 
+router.use(authMiddleware); 
 // ROUTE SELLER
-router.post("/registrasi", registrasiSeller);
-router.post("/login",loginSeller);
-router.put("/reset-password", resetPasswordSeller);
-router.put("/update-profile", updateProfileSeller);
+router.post("/registrasi-seller", registrasiSeller);
+router.post("/login-seller",loginSeller);
+router.put("/reset-password-seller", resetPasswordSeller);
+router.put("/update-profile-seller", updateProfileSeller);
 router.post("/create-auction", createAuction);
 
 // ROUTE BUYER
-router.post("/registrasi", registrasiBuyer);
-router.post("/login", loginBuyer);
-router.put("/reset-password", resetPasswordBuyer);
-router.put("/update-profile", updateProfileBuyer);
+router.post("/registrasi-buyer", registrasiBuyer);
+router.post("/login-buyer", loginBuyer);
+router.put("/reset-password-buyer", resetPasswordBuyer);
+router.put("/update-profile-buyer", updateProfileBuyer);
 router.get("/list-auction:/status", listAuctionByApproved);
 router.post("/create-bidding", createBidding);
 
-///////////////////////////////////////////////
-// router.get("/byEmail/:email", getUserByEmail);
-// router.post("/add",addUser);
-// router.put("/updateByEmail/:email", updateUserByEmail);
 app.use("/api", router);
 
 app.listen(3000, () => {

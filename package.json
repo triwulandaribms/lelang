@@ -6,7 +6,12 @@
   "scripts": {
     "start": "bun src/index.js",
     "dev": "bun --watch src/index.js",
-     "test": "bun test"
+    "test": "jest"
+  },
+  "jest": {
+    "transform": {
+      "^.+\\.[t|j]sx?$": "babel-jest"
+    }
   },
   "author": "Tri Wulandari <triwulandari3456@gmail.com>",
   "license": "MIT",
@@ -21,5 +26,8 @@
     "pg": "^8.13.1",
     "sequelize": "^6.37.7"
   },
-  "type": "module"
+  "type": "module",
+  "devDependencies": {
+    "babel-jest": "^29.7.0"
+  }
 }
