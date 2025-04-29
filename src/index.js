@@ -56,8 +56,8 @@ const sellerRouter = express.Router();
 
 sellerRouter.post("/registrasi-seller", authMiddleware, registrasiSeller); 
 sellerRouter.post("/login-seller", loginSeller); 
-sellerRouter.put("/reset-password-seller", authMiddleware, resetPasswordSeller);
-sellerRouter.put("/update-profile-seller", authMiddleware, updateProfileSeller);
+sellerRouter.put("/reset-password-seller/:id", authMiddleware, resetPasswordSeller);
+sellerRouter.put("/update-profile-seller/:id", authMiddleware, updateProfileSeller);
 sellerRouter.post("/create-auction", authMiddleware, createAuction);
 
 // BUYER ROUTES

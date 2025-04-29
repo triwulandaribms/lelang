@@ -2,7 +2,7 @@ import { sequelize } from "../config/db.js";
 import { DataTypes } from "sequelize";
 
 export const adminModel = sequelize.define("Admin", {
-    userId:{
+    id:{
         type: DataTypes.INTEGER,
         primaryKey:true,
         autoIncrement:true,

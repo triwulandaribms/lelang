@@ -2,7 +2,7 @@ import { sequelize } from "../config/db.js";
 import { DataTypes } from "sequelize";
 
 export const buyerModel = sequelize.define("Buyer", {
-    userId:{
+    id:{
         type: DataTypes.INTEGER,
         primaryKey:true,
         autoIncrement:true,

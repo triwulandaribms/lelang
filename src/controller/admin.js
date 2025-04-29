@@ -2,8 +2,6 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import { adminModel } from "../models/adminModel.js";
 
-// Login
-// Daftar akun
 export async function registrasi(req, res) {
   try {
     const { name, email, password } = req.body;
@@ -55,7 +53,7 @@ export async function login(req, res) {
 
       const cekEmail = await adminModel.findOne({
         where: { email },
-        attributes: ['userId', 'name', 'password', 'email', 'role']
+        attributes: ['id', 'name', 'password', 'email', 'role']
       });
   
       if (!cekEmail) {
@@ -69,11 +67,11 @@ export async function login(req, res) {
       }
   
       const dataJwt = jwt.sign({
-        userId: cekEmail.userId,
+        id: cekEmail.id,
         name: cekEmail.name,
         email: cekEmail.email,
         role: cekEmail.role,
-      },process.env.SECRET_KEY,  { expiresIn: '1h' });
+      },process.env.SECRET_KEY);
   
       // res.cookie("dataJwt", dataJwt);
       res.status(200).json({ message: "Berhasil login", token: `${dataJwt}`});

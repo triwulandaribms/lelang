@@ -1,4 +1,4 @@
-// import jwt from "jsonwebtoken";
+import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
 import { sellerModel } from "../models/sellerModel.js";
 // import { auction } from "../models/auctionModel.js";
@@ -42,15 +42,17 @@ export async function loginSeller(req, res){
     const { email, password } = req.body;
 
     const cekData = await sellerModel.findAll();
+    
+
     if (cekData.length === 0){
-      
+
       return res.status(404).json({message: "data seller tidak ditemukan.Mohon lakukan registrasi terlebih dahulu"});
 
     }else{
 
       const cekEmail = await sellerModel.findOne({
         where: { email },
-        attributes: ['userId', 'name', 'password', 'email', 'role']
+        attributes: ['id', 'name', 'password', 'email', 'role']
       });
   
       if (!cekEmail) {
@@ -62,13 +64,14 @@ export async function loginSeller(req, res){
       if (!hash) {
         return res.status(401).json({ message: "Password salah" });
       }
+
   
       const dataJwt = jwt.sign({
-        userId: cekEmail.userId,
+        id: cekEmail.id,
         name: cekEmail.name,
         email: cekEmail.email,
         role: cekEmail.role,
-      },process.env.SECRET_KEY,  { expiresIn: '1h' });
+      },process.env.SECRET_KEY);
   
   
       res.status(200).json({ message: "Berhasil login", token: `${dataJwt}`});
@@ -76,17 +79,65 @@ export async function loginSeller(req, res){
   
     }
   } catch (error) {
-    console.error("Gagal mendaftar:", error.message);
     res.status(500).json({ message: "Terjadi kesalahan server" });
   }
 }
 
-export async function resetPasswordSeller(req, res){
+export async function resetPasswordSeller(req, res) {
 
+  try {
+    const { id } = req.params;
+    const { passwordBaru } = req.body;
+
+    const seller = await sellerModel.findByPk(id);
+
+    if (!seller) {
+      return res.status(404).json({ message: "Data seller tidak ditemukan." });
+    }
+
+    const salt = await bcrypt.genSalt();
+    const hash = await bcrypt.hash(passwordBaru, salt);
+
+    await sellerModel.update(
+      { password: hash }, { where: { id } });
+
+    res.status(200).json({ message: "Password berhasil direset." });
+      
+  } catch (error) {
+    console.error("Reset password error:", error.message);
+    res.status(500).json({ message: "Terjadi kesalahan server" });
+  }
 }
 
 export async function updateProfileSeller(req, res){
 
+  try {
+
+   const {id} = req.params;
+   const { email, name } = req.body;
+
+   const cekData = await sellerModel.findAll({ attributes: ["name", "email", "password"] });
+
+    if(cekData){
+      if (cekData.some(seller => seller.email === email)) {
+        return res.status(409).json({ message: "Email sudah terdaftar sebelumnya." });
+      }
+
+      const result = await sellerModel.update({
+        email,
+        name
+      }, {where: id });
+
+      res.status(201).json({ message: "Profil berhasil diupdate." });
+  
+    }else{
+      return res.status(404).json({ message: "Data seller tidak ditemukan." });
+    }
+
+  } catch (error) {
+    console.error("error:", error.message);
+    res.status(500).json({ message: "Terjadi kesalahan server" });
+  }
 }
 
 export async function  createAuction(req, res){
