@@ -1,5 +1,8 @@
 import express from "express";
 import cookieParser from "cookie-parser";
+import authMiddleware from "./middleware/auth.js";
+
+// Import controller untuk admin, seller, dan buyer
 import {
   login,
   registrasi,
@@ -9,61 +12,70 @@ import {
   statusToReject,
   deletUser,
   cekEmail,
-  logout } from "./controller/admin.js";
+  logout
+} from "./controller/admin.js";
 
-  import {
-    registrasiSeller,
-    loginSeller,
-    resetPasswordSeller,
-    updateProfileSeller,
-    createAuction
-  } from "./controller/seller.js";
+import {
+  registrasiSeller,
+  loginSeller,
+  resetPasswordSeller,
+  updateProfileSeller,
+  createAuction
+} from "./controller/seller.js";
 
-  import {
-    registrasiBuyer,
-    loginBuyer,
-    resetPasswordBuyer,
-    updateProfileBuyer,
-    listAuctionByApproved,
-    createBidding
-  } from "./controller/buyer.js";
-import authMiddleware from "./middleware/auth.js";
+import {
+  registrasiBuyer,
+  loginBuyer,
+  resetPasswordBuyer,
+  updateProfileBuyer,
+  listAuctionByApproved,
+  createBidding
+} from "./controller/buyer.js";
 
 const app = express();
 app.use(express.json());
-const router = express.Router();
 app.use(cookieParser());
 
-// ROUTE ADMIN
-router.post("/registrasi", registrasi);
-router.post("/login", login);
-router.get("/list-user", listUser);
-router.delete("/delete-user", deletUser);
-router.get("/list-user:/status", listUserByStatus);
-router.put("/status-approved", statusToApproved);
-router.put("/status-reject", statusToReject);
-router.post("/cekEmail", cekEmail);
-router.post("/logout", logout);
+const router = express.Router();
 
-router.use(authMiddleware); 
-// ROUTE SELLER
-router.post("/registrasi-seller", registrasiSeller);
-router.post("/login-seller",loginSeller);
-router.put("/reset-password-seller", resetPasswordSeller);
-router.put("/update-profile-seller", updateProfileSeller);
-router.post("/create-auction", createAuction);
+// ADMIN ROUTES
+const adminRouter = express.Router();
 
-// ROUTE BUYER
-router.post("/registrasi-buyer", registrasiBuyer);
-router.post("/login-buyer", loginBuyer);
-router.put("/reset-password-buyer", resetPasswordBuyer);
-router.put("/update-profile-buyer", updateProfileBuyer);
-router.get("/list-auction:/status", listAuctionByApproved);
-router.post("/create-bidding", createBidding);
+adminRouter.post("/registrasi", registrasi);
+adminRouter.post("/login", login); 
+adminRouter.get("/list-user", authMiddleware, listUser);
+adminRouter.delete("/delete-user", authMiddleware, deletUser);
+adminRouter.get("/list-user/:status", authMiddleware, listUserByStatus);
+adminRouter.put("/status-approved", authMiddleware, statusToApproved);
+adminRouter.put("/status-reject", authMiddleware, statusToReject);
+adminRouter.post("/cekEmail", authMiddleware, cekEmail);
+adminRouter.post("/logout", authMiddleware, logout);
+
+// SELLER ROUTES
+const sellerRouter = express.Router();
+
+sellerRouter.post("/registrasi-seller", authMiddleware, registrasiSeller); 
+sellerRouter.post("/login-seller", loginSeller); 
+sellerRouter.put("/reset-password-seller", authMiddleware, resetPasswordSeller);
+sellerRouter.put("/update-profile-seller", authMiddleware, updateProfileSeller);
+sellerRouter.post("/create-auction", authMiddleware, createAuction);
+
+// BUYER ROUTES
+const buyerRouter = express.Router();
+
+buyerRouter.post("/registrasi-buyer", authMiddleware, registrasiBuyer); 
+buyerRouter.post("/login-buyer", loginBuyer);
+buyerRouter.put("/reset-password-buyer", authMiddleware, resetPasswordBuyer);
+buyerRouter.put("/update-profile-buyer", authMiddleware, updateProfileBuyer);
+buyerRouter.get("/list-auction/:status", authMiddleware, listAuctionByApproved);
+buyerRouter.post("/create-bidding", authMiddleware, createBidding);
+
+router.use("/admin", adminRouter);
+router.use("/seller", sellerRouter);
+router.use("/buyer", buyerRouter);
 
 app.use("/api", router);
 
 app.listen(3000, () => {
-  console.log("Server berhasil berjalan di port 3000.");
+  console.log("Server berjalan di port 3000.");
 });
-

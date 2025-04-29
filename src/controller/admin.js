@@ -3,43 +3,6 @@ import jwt from "jsonwebtoken";
 import { adminModel } from "../models/adminModel.js";
 
 // Login
-export async function login(req, res) {
-  try {
-    const { email, password } = req.body;
-
-    const cekEmail = await adminModel.findOne({
-      where: { email },
-      attributes: ['userId', 'name', 'password', 'email', 'role']
-    });
-
-    if (!cekEmail) {
-      return res.status(404).json({ message: "Email tidak ditemukan" });
-    }
-
-    const hash = await bcrypt.compare(password, cekEmail.password);
-
-    if (!hash) {
-      return res.status(401).json({ message: "Password salah" });
-    }
-
-    const dataJwt = jwt.sign({
-      userId: cekEmail.userId,
-      name: cekEmail.name,
-      email: cekEmail.email,
-      role: cekEmail.role,
-    },process.env.SECRET_KEY);
-
-    // console.log(dataJwt);
-    // res.cookie("dataJwt", dataJwt);
-    res.status(200).json({ message: "Berhasil login", token: `${dataJwt}`});
-
-  } catch (error) {
-    console.error("Gagal mendaftar:", error.message);
-    res.status(500).json({ message: "Terjadi kesalahan server" });
-  }
-
-}
-
 // Daftar akun
 export async function registrasi(req, res) {
   try {
@@ -70,6 +33,53 @@ export async function registrasi(req, res) {
       res.status(401).json({ message: "Akun berhasil ditambahkan." });
 
     }
+
+  } catch (error) {
+    console.error("Gagal mendaftar:", error.message);
+    res.status(500).json({ message: "Terjadi kesalahan server" });
+  }
+
+}
+
+export async function login(req, res) {
+  try {
+    const { email, password } = req.body;
+
+    const cekData = await adminModel.findAll();
+
+    if(cekData.length === 0){
+
+      return res.status(404).json({message: "data admin tidak ditemukan.Mohon lakukan registrasi terlebih dahulu"});
+
+    }else{
+
+      const cekEmail = await adminModel.findOne({
+        where: { email },
+        attributes: ['userId', 'name', 'password', 'email', 'role']
+      });
+  
+      if (!cekEmail) {
+        return res.status(404).json({ message: "Email tidak ditemukan" });
+      }
+  
+      const hash = await bcrypt.compare(password, cekEmail.password);
+  
+      if (!hash) {
+        return res.status(401).json({ message: "Password salah" });
+      }
+  
+      const dataJwt = jwt.sign({
+        userId: cekEmail.userId,
+        name: cekEmail.name,
+        email: cekEmail.email,
+        role: cekEmail.role,
+      },process.env.SECRET_KEY,  { expiresIn: '1h' });
+  
+      // res.cookie("dataJwt", dataJwt);
+      res.status(200).json({ message: "Berhasil login", token: `${dataJwt}`});
+  
+    }
+
 
   } catch (error) {
     console.error("Gagal mendaftar:", error.message);

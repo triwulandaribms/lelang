@@ -28,23 +28,43 @@ import jwt from "jsonwebtoken";
 
 function authMiddleware(req, res, next) {
 
-  const  cekAuthHeader= req.headers.authorization;
+  const cekTokenAuth = req.headers.authorization;
 
-  if (cekAuthHeader) {
+  if (!cekTokenAuth) {
+    return res.status(401).json({ message: "Mohon masukkan token." });
+  }
 
-    const token = cekAuthHeader.split(" ")[1];;
-    try {
-      req.user = jwt.verify(token, process.env.SECRET_KEY);
+  const token = cekTokenAuth.split(" ")[1];
 
-      // Bisa kasih kontrol berdasarkan role di sini kalau mau
-      next();
-    } catch (err) {
-      return res.status(401).json({ message: "Token tidak valid" });
+  try {
+
+    const cekToken = jwt.verify(token, process.env.SECRET_KEY);
+    req.user = cekToken;
+
+    if (req.path.includes("/admin") && cekToken.role !== "admin") {
+      return res.status(403).json({ message: "Akses ditolak. Hanya admin yang bisa mengakses." });
+    } 
+    
+    if (req.path.includes("/seller") && cekToken.role !== "seller") {
+      return res.status(403).json({ message: "Akses ditolak. Hanya seller yang bisa mengakses." });
+    } 
+    
+    if (req.path.includes("/buyer") && cekToken.role !== "buyer") {
+      return res.status(403).json({ message: "Akses ditolak. Hanya buyer yang bisa mengakses." });
     }
 
-  } else {
-    return res.status(401).json({ message: "Token tidak ditemukan" });
+    next();
+
+  } catch (err) {
+
+    if (err.name === "TokenExpiredError") {
+      return res.status(401).json({ message: "Token telah kadaluarsa. Silakan login kembali." });
+    } else {
+      return res.status(401).json({ message: "Token tidak valid." });
+    }
+    
   }
 }
 
 export default authMiddleware;
+
