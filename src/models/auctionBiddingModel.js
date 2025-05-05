@@ -10,8 +10,16 @@ export const auctionBiddingModel = sequelize.define("Bidding", {
     },
     auctionId:{
         type: DataTypes.INTEGER,
-        allowNull: false,
+        allowNull: false, 
+        references: {
+            model: 'Auction',
+            key: 'id'
+          }
     },
+    harga_tawar: {
+        type: DataTypes.DECIMAL,
+        allowNull: false
+    }
 },
 {
     tableName:"Bidding",

@@ -29,7 +29,7 @@ import {
   resetPasswordBuyer,
   updateProfileBuyer,
   listAuctionByApproved,
-  createBidding
+  createAuctionBidding
 } from "./controller/buyer.js";
 
 const app = express();
@@ -65,10 +65,10 @@ const buyerRouter = express.Router();
 
 buyerRouter.post("/registrasi-buyer", authMiddleware, registrasiBuyer); 
 buyerRouter.post("/login-buyer", loginBuyer);
-buyerRouter.put("/reset-password-buyer", authMiddleware, resetPasswordBuyer);
-buyerRouter.put("/update-profile-buyer", authMiddleware, updateProfileBuyer);
+buyerRouter.put("/reset-password-buyer/:id", authMiddleware, resetPasswordBuyer);
+buyerRouter.put("/update-profile-buyer/:id", authMiddleware, updateProfileBuyer);
 buyerRouter.get("/list-auction/:status", authMiddleware, listAuctionByApproved);
-buyerRouter.post("/create-bidding", authMiddleware, createBidding);
+buyerRouter.post("/create-bidding", authMiddleware, createAuctionBidding);
 
 router.use("/admin", adminRouter);
 router.use("/seller", sellerRouter);

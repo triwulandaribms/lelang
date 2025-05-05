@@ -1,7 +1,7 @@
 import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
 import { sellerModel } from "../models/sellerModel.js";
-// import { auction } from "../models/auctionModel.js";
+import { auctionModel } from "../models/auctionModel.js";
 
 export async function registrasiSeller(req, res) {
   try {
@@ -141,6 +141,31 @@ export async function updateProfileSeller(req, res){
 }
 
 export async function  createAuction(req, res){
+  try {
+      
+    const { nama_barang, deskripsi, harga_awal, waktu_mulai, waktu_akhir } = req.body;
 
+
+    if(!nama_barang || !deskripsi || !harga_awal || !waktu_mulai || !waktu_akhir){
+      res.status(400).json({message:"field tidak boleh ada yang kosong"});
+    }
+    
+    const dataAuction = await auctionModel.create({
+      nama_barang,
+      deskripsi,
+      harga_awal,
+      waktu_mulai,
+      waktu_akhir
+    });
+
+    return res.status(201).json({
+      message: "Auction berhasil dibuat.",
+      data: dataAuction
+    });
+
+  } catch (error) {
+    console.error("Error creating auction:", error);
+    return res.status(500).json({ message: "Terjadi kesalahan server." });
+  }
 }
 

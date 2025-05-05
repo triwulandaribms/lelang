@@ -8,42 +8,33 @@ export const auctionModel = sequelize.define("Auction", {
         autoIncrement:true,
         allowNull:false
     },
-    code:{
+    nama_barang:{
         type: DataTypes.STRING,
         allowNull: false
     },
-    name:{
-        type: DataTypes.STRING,
+    deskripsi:{
+        type: DataTypes.TEXT,
         allowNull: false
     },
-    description:{
-        type: DataTypes.STRING,
-        allowNull: false
-    },
-    offer:{
-        type: DataTypes.INTEGER,
+    harga_awal:{
+        type: DataTypes.DECIMAL,
         allowNull: false,
     },
-    highestBid:{
-        type: DataTypes.INTEGER,
+    waktu_mulai:{
+        type: DataTypes.DATE,
         allowNull: false,
     },
-    startedAt:{
-        type: DataTypes.TIME,
-        allowNull: false,
-    },
-    endedAt:{
-        type: DataTypes.TIME,
+    waktu_akhir:{
+        type: DataTypes.DATE,
         allowNull: false,
     },
     status:{
         type: DataTypes.STRING,
-        allowNull: false,
+        defaultValue: " Waiting Approval "
     }
 },
 {
     tableName:"Auction",
-    timestamps: false,
 }
 );
 
