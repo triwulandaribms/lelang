@@ -1,7 +1,9 @@
 import { buyerModel } from "../models/buyerModel.js";
-// import { bidding } from "../models/auctionBiddingModel.js";
+import { auctionBiddingModel } from "../models/auctionBiddingModel.js";
+import { auctionModel } from "../models/auctionModel.js";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
+import { Op } from "sequelize";
 
 export async function registrasiBuyer(req, res){
     try {
@@ -139,10 +141,62 @@ export async function updateProfileBuyer(req, res){
        }
 }
 
-export async function listAuctionByApproved(req, res){
+export async function listAuctionByApproved(_req, res){
 
+    try {
+        
+        const approvedAuction = await auctionModel.findAll({
+            where: { status:"approved" }
+        });
+
+        res.status(200).json({
+            data: approvedAuction
+          });
+
+    } catch (error) {
+        console.error("error:", error.message);
+        res.status(500).json({ message: "Terjadi kesalahan server" });
+    }
 }
 
 export async function createAuctionBidding(req, res){
+    try {
+        const {auctionId, harga_tawar} = req.body;
 
+
+        const cekStatusAuction = await auctionModel.findOne({
+            where:{
+                id:auctionId,
+                status:"approved",
+                waktu_berakhir:{[Op.gt]: new Date()}
+        }});
+
+        if(!cekStatusAuction){
+            res.status(400).json({
+                message: "Auction belum disetujui."
+            });
+        }
+
+        const hargaTertinggi = await auctionBiddingModel.findOne({
+            where: {auctionId},
+            order: [["harga_awal", "DESC"]]
+        });
+
+        if(hargaTertinggi && parseFloat(harga_tawar) <= parseFloat(hargaTertinggi.harga_tawar)){
+            res.status(400).json({
+                message: ` Penawaran harus lebih tinggi dari bid tertinggi sebelumnya (${hargaTertinggi.harga_tawar})`
+            })
+        }
+        const dataAuctionBidding = await auctionBiddingModel.create({
+            auctionId,
+            harga_tawar
+        });
+        res.status(2001).json({
+            message: "Penawaran berhasil dilakukan.",
+            json: dataAuctionBidding
+        })
+    } catch (error) {
+        console.error("error:", error.message);
+        res.status(500).json({ message: "Terjadi kesalahan server" });
+    }
 }
