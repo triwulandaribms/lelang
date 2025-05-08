@@ -2,12 +2,12 @@ import express from "express";
 import cookieParser from "cookie-parser";
 import authMiddleware from "./middleware/auth.js";
 
-// Import controller untuk admin, seller, dan buyer
 import {
   login,
   registrasi,
-  listUser,
-  listUserByStatus,
+  listSeller,
+  listBuyer,
+  listAuction,
   statusToApproved,
   statusToReject,
   deletUser,
@@ -43,9 +43,10 @@ const adminRouter = express.Router();
 
 adminRouter.post("/registrasi", registrasi);
 adminRouter.post("/login", login); 
-adminRouter.get("/list-user", authMiddleware, listUser);
+adminRouter.get("/list-seller", authMiddleware, listSeller);
+adminRouter.get("/list-buyer", authMiddleware, listBuyer);
 adminRouter.delete("/delete-user", authMiddleware, deletUser);
-adminRouter.get("/list-user/:status", authMiddleware, listUserByStatus);
+adminRouter.get("/list-auction", authMiddleware, listAuction);
 adminRouter.put("/status-approved", authMiddleware, statusToApproved);
 adminRouter.put("/status-reject", authMiddleware, statusToReject);
 adminRouter.post("/cekEmail", authMiddleware, cekEmail);

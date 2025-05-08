@@ -1,6 +1,9 @@
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import { adminModel } from "../models/adminModel.js";
+import { sellerModel } from "../models/sellerModel.js";
+import { buyerModel } from "../models/buyerModel.js";
+import { auctionModel } from "../models/auctionModel.js";
 
 export async function registrasi(req, res) {
   try {
@@ -86,16 +89,56 @@ export async function login(req, res) {
 
 }
 
-export async function listUser(req, res){
+export async function listSeller(_req, res){
 
+  try {
+    
+    const dataSeller = await sellerModel.findAll();
+    res.status(200).json({
+      data: dataSeller
+    });
+
+  } catch (error) {
+    console.error("Gagal mendaftar:", error.message);
+    res.status(500).json({ message: "Terjadi kesalahan server" });
+  }
+}
+
+export async function listBuyer(_req, res){
+
+  try {
+    
+    const dataBuyer = await buyerModel.findAll();
+    res.status(200).json({
+      data: dataBuyer
+    });
+    
+  } catch (error) {
+    console.error("Gagal mendaftar:", error.message);
+    res.status(500).json({ message: "Terjadi kesalahan server" });
+
+  }
 }
 
 export async function deletUser(req, res){
 
 }
 
-export async function listUserByStatus(req, res){
+export async function listAuction(_req, res){
 
+  try {
+    
+    const dataAuction = await auctionModel.findAll();
+
+    res.status(200).json({
+      data: dataAuction
+    });
+
+  } catch (error) {
+    console.error("Gagal mendaftar:", error.message);
+    res.status(500).json({ message: "Terjadi kesalahan server" });
+
+  }
 }
 
 export async function statusToApproved(req, res){
