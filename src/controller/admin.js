@@ -125,13 +125,12 @@ export async function deletSeller(req, res){
   try {
     const {id} = req.params;
 
-    const dataSeller = await sellerModel.findOne({
+    await sellerModel.findOne({
       where: {id}
     });
 
     res.status(201).json({
-      message: `Data seller sudah terhapus`,
-      data: dataSeller
+      message: `Data seller sudah terhapus`    
     });
 
   } catch (error) {
@@ -145,13 +144,12 @@ export async function deletBuyer(req, res){
   try {
     const {id} = req.params;
 
-    const dataBuyer = await buyerModel.findOne({
+    await buyerModel.findOne({
       where: {id}
     });
 
     res.status(201).json({
-      message: `Data buyer sudah terhapus`,
-      data: dataBuyer
+      message: `Data buyer sudah terhapus`
     });
 
   } catch (error) {
@@ -179,12 +177,73 @@ export async function listAuction(_req, res){
 
 export async function statusToApproved(req, res){
 
+  try {
+    const { id } = req.params;
+    const { status } = req.body
+    
+    const dataAuction = await auctionModel.findOne({
+      where: { id },
+      attributes: ['status']
+    });
+
+    if (!dataAuction) {
+      res.status(404).json({ message: "Data auction tidak ditemukan." });
+    }
+
+    if (dataAuction.status.trim().toLowerCase() === "Approved") {
+      return res.status(400).json({ message: "Auction sudah diset ke status Approved." });
+    }
+
+    await auctionModel.update({
+      status
+    }, {
+      where: {id}
+    });
+
+    res.status(201).json({
+      message: "berhasil lelang dimulai"
+    });
+
+  } catch (error) {
+    console.error("Gagal mendaftar:", error.message);
+    res.status(500).json({ message: "Terjadi kesalahan server" });
+  }
 }
 
 export async function statusToReject(req, res){
+  try {
+    const { id } = req.params;
+    const { status } = req.body
+    
+    const dataAuction = await auctionModel.findOne({
+      where: { id },
+      attributes: ['status']
+    });
 
+    if (!dataAuction) {
+      res.status(404).json({ message: "Data auction tidak ditemukan." });
+    }
+
+    if (dataAuction.status.trim().toLowerCase() === "Rejected") {
+      return res.status(400).json({ message: "Auction sudah diset ke status Rejected." });
+    }
+
+    await auctionModel.update({
+      status
+    }, {
+      where: {id}
+    });
+
+    res.status(201).json({
+      message: "berhasil pembatalan pelelangan"
+    });
+
+  } catch (error) {
+    console.error("Gagal mendaftar:", error.message);
+    res.status(500).json({ message: "Terjadi kesalahan server" });
+  }
 }
-// Cek Email Endpoint
+
 export async function cekEmail(req, res){
   try {
 
@@ -218,40 +277,6 @@ export async function cekEmail(req, res){
 
 }
 
-// Lupa password
-// router.put("/forgout", async (req, res) => {
-
-//   try {
-
-//     const { email, password } = req.body;
-//     const akun = await akunModel.findOne({where:{email}})
-  
-//     if (!akun) {
-//       return res.status(404).json({ message: "User tidak ditemukan" });
-//     }
-  
-//     const salt = await bcrypt.genSalt();
-//     const hash = await bcrypt.hash(password, salt);
-  
-//     const updated = await akunModel.update(
-//       { hash },
-//       { where: { email } }
-//     );
-  
-//     if (updated[0] === 1) {
-//       const updatedUser = await cekEmail(email);
-//       return res.status(200).json({ message: "Password berhasil diupdate", data: updatedUser });
-//     }
-  
-//     res.status(500).json({ message: "Gagal update password" });
-  
-//   } catch (error) {
-//     console.error("Gagal mendaftar:", error.message);
-//     res.status(500).json({ message: "Terjadi kesalahan server" });
-//   }
-// });
-
-// Logout
 export async function logout(_req, res){
   res.clearCookie("dataJwt").send("Logout berhasil");
 }
