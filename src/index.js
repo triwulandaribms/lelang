@@ -10,9 +10,11 @@ import {
   listAuction,
   statusToApproved,
   statusToReject,
-  deletUser,
+  deletSeller,
+  deletBuyer,
   cekEmail,
-  logout
+  logout,
+  deletSeller
 } from "./controller/admin.js";
 
 import {
@@ -45,7 +47,8 @@ adminRouter.post("/registrasi", registrasi);
 adminRouter.post("/login", login); 
 adminRouter.get("/list-seller", authMiddleware, listSeller);
 adminRouter.get("/list-buyer", authMiddleware, listBuyer);
-adminRouter.delete("/delete-user", authMiddleware, deletUser);
+adminRouter.delete("/delete-seller/:id", authMiddleware, deletSeller);
+adminRouter.delete("/delete-buyer/:id", authMiddleware, deletBuyer);
 adminRouter.get("/list-auction", authMiddleware, listAuction);
 adminRouter.put("/status-approved", authMiddleware, statusToApproved);
 adminRouter.put("/status-reject", authMiddleware, statusToReject);

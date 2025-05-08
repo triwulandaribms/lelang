@@ -112,7 +112,7 @@ export async function listBuyer(_req, res){
     res.status(200).json({
       data: dataBuyer
     });
-    
+
   } catch (error) {
     console.error("Gagal mendaftar:", error.message);
     res.status(500).json({ message: "Terjadi kesalahan server" });
@@ -120,8 +120,44 @@ export async function listBuyer(_req, res){
   }
 }
 
-export async function deletUser(req, res){
+export async function deletSeller(req, res){
 
+  try {
+    const {id} = req.params;
+
+    const dataSeller = await sellerModel.findOne({
+      where: {id}
+    });
+
+    res.status(201).json({
+      message: `Data seller sudah terhapus`,
+      data: dataSeller
+    });
+
+  } catch (error) {
+    console.error("Gagal mendaftar:", error.message);
+    res.status(500).json({ message: "Terjadi kesalahan server" });
+  }
+}
+
+export async function deletBuyer(req, res){
+
+  try {
+    const {id} = req.params;
+
+    const dataBuyer = await buyerModel.findOne({
+      where: {id}
+    });
+
+    res.status(201).json({
+      message: `Data buyer sudah terhapus`,
+      data: dataBuyer
+    });
+
+  } catch (error) {
+    console.error("Gagal mendaftar:", error.message);
+    res.status(500).json({ message: "Terjadi kesalahan server" });
+  }
 }
 
 export async function listAuction(_req, res){
