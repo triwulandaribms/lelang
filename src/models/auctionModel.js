@@ -35,6 +35,7 @@ export const auctionModel = sequelize.define("Auction", {
 },
 {
     tableName:"Auction",
+    timestamps: false
 }
 );
 

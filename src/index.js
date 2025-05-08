@@ -54,7 +54,7 @@ adminRouter.post("/logout", authMiddleware, logout);
 // SELLER ROUTES
 const sellerRouter = express.Router();
 
-sellerRouter.post("/registrasi-seller", authMiddleware, registrasiSeller); 
+adminRouter.post("/registrasi-seller", authMiddleware, registrasiSeller); 
 sellerRouter.post("/login-seller", loginSeller); 
 sellerRouter.put("/reset-password-seller/:id", authMiddleware, resetPasswordSeller);
 sellerRouter.put("/update-profile-seller/:id", authMiddleware, updateProfileSeller);
@@ -63,7 +63,7 @@ sellerRouter.post("/create-auction", authMiddleware, createAuction);
 // BUYER ROUTES
 const buyerRouter = express.Router();
 
-buyerRouter.post("/registrasi-buyer", authMiddleware, registrasiBuyer); 
+adminRouter.post("/registrasi-buyer", authMiddleware, registrasiBuyer); 
 buyerRouter.post("/login-buyer", loginBuyer);
 buyerRouter.put("/reset-password-buyer/:id", authMiddleware, resetPasswordBuyer);
 buyerRouter.put("/update-profile-buyer/:id", authMiddleware, updateProfileBuyer);

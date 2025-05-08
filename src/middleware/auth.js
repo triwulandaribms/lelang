@@ -18,7 +18,7 @@ function authMiddleware(req, res, next) {
     if (req.baseUrl.includes("/admin") && cekToken.role !== "admin") {
       return res.status(403).json({ message: "Akses ditolak. Hanya admin yang bisa mengakses." }); 
     } 
-    
+
     if (req.baseUrl.includes("/seller") && cekToken.role !== "seller") {
       return res.status(403).json({ message: "Akses ditolak. Hanya seller yang bisa mengakses." });
     } 

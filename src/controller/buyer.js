@@ -173,7 +173,7 @@ export async function createAuctionBidding(req, res){
 
         if(!cekStatusAuction){
             res.status(400).json({
-                message: "Auction belum disetujui."
+                message: "Auction belum disetujui atau approved."
             });
         }
 
