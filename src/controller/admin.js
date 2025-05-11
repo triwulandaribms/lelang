@@ -225,7 +225,11 @@ export async function statusToReject(req, res){
     }
 
     if (dataAuction.status.trim().toLowerCase() === "Rejected") {
-      return res.status(400).json({ message: "Auction sudah diset ke status Rejected." });
+      res.status(400).json({ message: "Auction sudah diset ke status Rejected." });
+    }
+
+    if(dataAuction.status.trim().toLowerCase() !== "Approved"){
+      res.status(400).josn({message: "Data auction tidak berstatus approved."});
     }
 
     await auctionModel.update({

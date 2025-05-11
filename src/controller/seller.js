@@ -123,10 +123,10 @@ export async function updateProfileSeller(req, res){
         return res.status(409).json({ message: "Email sudah terdaftar sebelumnya." });
       }
 
-      const result = await sellerModel.update({
+    await sellerModel.update({
         email,
         name
-      }, {where: id });
+      }, {where: {id }});
 
       res.status(201).json({ message: "Profil berhasil diupdate." });
   
@@ -147,15 +147,29 @@ export async function  createAuction(req, res){
 
 
     if(!nama_barang || !deskripsi || !harga_awal || !waktu_mulai || !waktu_akhir){
-      res.status(400).json({message:"field tidak boleh ada yang kosong"});
+      return res.status(400).json({message:"field tidak boleh ada yang kosong"});
     }
+
     
+    const startTime = new Date(waktu_mulai);
+    const endTime = new Date(waktu_akhir);
+
+    
+    if (isNaN(startTime) || isNaN(endTime)) {
+      return res.status(400).json({ message: "Format waktu tidak valid" });
+    }
+
+    if (endTime <= startTime) {
+      return res.status(400).json({ message: "Waktu akhir harus lebih besar dari waktu mulai." });
+    }
+
+   
     const dataAuction = await auctionModel.create({
       nama_barang,
       deskripsi,
       harga_awal,
-      waktu_mulai,
-      waktu_akhir
+      waktu_mulai:startTime,
+      waktu_akhir: endTime
     });
 
     return res.status(201).json({

@@ -13,8 +13,7 @@ import {
   deletSeller,
   deletBuyer,
   cekEmail,
-  logout,
-  deletSeller
+  logout
 } from "./controller/admin.js";
 
 import {
@@ -71,7 +70,7 @@ adminRouter.post("/registrasi-buyer", authMiddleware, registrasiBuyer);
 buyerRouter.post("/login-buyer", loginBuyer);
 buyerRouter.put("/reset-password-buyer/:id", authMiddleware, resetPasswordBuyer);
 buyerRouter.put("/update-profile-buyer/:id", authMiddleware, updateProfileBuyer);
-buyerRouter.get("/list-auction/:status", authMiddleware, listAuctionByApproved);
+buyerRouter.get("/list-auction", authMiddleware, listAuctionByApproved);
 buyerRouter.post("/create-bidding", authMiddleware, createAuctionBidding);
 
 router.use("/admin", adminRouter);
