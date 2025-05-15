@@ -178,7 +178,7 @@ export async function listAuction(_req, res){
 export async function statusToApproved(req, res){
 
   try {
-    const { id } = req.params;
+    const { id } = req.query;
     const { status } = req.body
     
     const dataAuction = await auctionModel.findOne({
@@ -212,7 +212,7 @@ export async function statusToApproved(req, res){
 
 export async function statusToReject(req, res){
   try {
-    const { id } = req.params;
+    const { id } = req.query;
     const { status } = req.body
     
     const dataAuction = await auctionModel.findOne({
@@ -224,12 +224,12 @@ export async function statusToReject(req, res){
       res.status(404).json({ message: "Data auction tidak ditemukan." });
     }
 
-    if (dataAuction.status.trim().toLowerCase() === "Rejected") {
+    if (dataAuction.status.trim().toLowerCase() === "rejected") {
       res.status(400).json({ message: "Auction sudah diset ke status Rejected." });
     }
 
-    if(dataAuction.status.trim().toLowerCase() !== "Approved"){
-      res.status(400).josn({message: "Data auction tidak berstatus approved."});
+    if(dataAuction.status.trim().toLowerCase() !== "approved"){
+      res.status(400).json({message: "Data auction tidak berstatus approved."});
     }
 
     await auctionModel.update({

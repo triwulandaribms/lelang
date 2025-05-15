@@ -3,7 +3,6 @@ import { auctionBiddingModel } from "../models/auctionBiddingModel.js";
 import { auctionModel } from "../models/auctionModel.js";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
-import { Op } from "sequelize";
 
 export async function registrasiBuyer(req, res) {
   try {

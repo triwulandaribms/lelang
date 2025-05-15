@@ -49,8 +49,8 @@ adminRouter.get("/list-buyer", authMiddleware, listBuyer);
 adminRouter.delete("/delete-seller/:id", authMiddleware, deletSeller);
 adminRouter.delete("/delete-buyer/:id", authMiddleware, deletBuyer);
 adminRouter.get("/list-auction", authMiddleware, listAuction);
-adminRouter.put("/status-approved/:id", authMiddleware, statusToApproved);
-adminRouter.put("/status-reject/:id", authMiddleware, statusToReject);
+adminRouter.put("/status-approved", authMiddleware, statusToApproved);
+adminRouter.put("/status-reject", authMiddleware, statusToReject);
 adminRouter.post("/cekEmail", authMiddleware, cekEmail);
 adminRouter.post("/logout", authMiddleware, logout);
 
