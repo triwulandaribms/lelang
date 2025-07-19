@@ -1,15 +1,15 @@
-import bcrypt from "bcryptjs";
-import jwt from "jsonwebtoken";
-import { adminModel } from "../models/adminModel.js";
-import { sellerModel } from "../models/sellerModel.js";
-import { buyerModel } from "../models/buyerModel.js";
-import { auctionModel } from "../models/auctionModel.js";
+const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
+const MasterAdmin = require('../models/adminModel.js');
+const MasterSeller = require('../models/sellerModel.js');
+const MasterBuyer = require('../models/buyerModel.js');
+const MasterAuction = require('../models/auctionModel.js');
 
-export async function registrasi(req, res) {
+async function registrasi(req, res) {
   try {
     const { name, email, password } = req.body;
 
-    const data = await adminModel.findAll({ attributes: ['name', 'email', 'password'] });
+    const data = await MasterAdmin.findAll({ attributes: ['name', 'email', 'password'] });
 
     if (data.some(akun => akun.email == email)) {
       res.status(201).json({ message: "email sudah pernah untuk mendaftar" });
@@ -24,233 +24,174 @@ export async function registrasi(req, res) {
       const salt = await bcrypt.genSalt();
       const hash = await bcrypt.hash(password, salt);
 
-      await adminModel.create(
-        {
-          name,
-          email,
-          password: hash,
-        }
-      );
+      await MasterAdmin.create({
+        name,
+        email,
+        password: hash,
+      });
       res.status(401).json({ message: "Akun berhasil ditambahkan." });
-
     }
-
   } catch (error) {
     console.error("Gagal mendaftar:", error.message);
     res.status(500).json({ message: "Terjadi kesalahan server" });
   }
-
 }
 
-export async function login(req, res) {
+async function login(req, res) {
   try {
     const { email, password } = req.body;
 
-    const cekData = await adminModel.findAll();
+    const cekData = await MasterAdmin.findAll();
 
-    if(cekData.length === 0){
-
-      return res.status(404).json({message: "data admin tidak ditemukan.Mohon lakukan registrasi terlebih dahulu"});
-
-    }else{
-
-      const cekEmail = await adminModel.findOne({
+    if (cekData.length === 0) {
+      return res.status(404).json({ message: "data admin tidak ditemukan.Mohon lakukan registrasi terlebih dahulu" });
+    } else {
+      const cekEmail = await MasterAdmin.findOne({
         where: { email },
         attributes: ['id', 'name', 'password', 'email', 'role']
       });
-  
+
       if (!cekEmail) {
         return res.status(404).json({ message: "Email tidak ditemukan" });
       }
-  
+
       const hash = await bcrypt.compare(password, cekEmail.password);
-  
+
       if (!hash) {
         return res.status(401).json({ message: "Password salah" });
       }
-  
+
       const dataJwt = jwt.sign({
         id: cekEmail.id,
         name: cekEmail.name,
         email: cekEmail.email,
         role: cekEmail.role,
-      },process.env.SECRET_KEY);
-  
-      // res.cookie("dataJwt", dataJwt);
-      res.status(200).json({ message: "Berhasil login", token: `${dataJwt}`});
-  
+      }, process.env.SECRET_KEY);
+
+      res.status(200).json({ message: "Berhasil login", token: `${dataJwt}` });
     }
-
-
   } catch (error) {
     console.error("Gagal mendaftar:", error.message);
     res.status(500).json({ message: "Terjadi kesalahan server" });
   }
-
 }
 
-export async function listSeller(_req, res){
-
+async function listSeller(_req, res) {
   try {
-    
-    const dataSeller = await sellerModel.findAll();
-    res.status(200).json({
-      data: dataSeller
-    });
-
+    const dataSeller = await MasterSeller.findAll();
+    res.status(200).json({ data: dataSeller });
   } catch (error) {
     console.error("Gagal mendaftar:", error.message);
     res.status(500).json({ message: "Terjadi kesalahan server" });
   }
 }
 
-export async function listBuyer(_req, res){
-
+async function listBuyer(_req, res) {
   try {
-    
-    const dataBuyer = await buyerModel.findAll();
-    res.status(200).json({
-      data: dataBuyer
-    });
-
+    const dataBuyer = await MasterBuyer.findAll();
+    res.status(200).json({ data: dataBuyer });
   } catch (error) {
     console.error("Gagal mendaftar:", error.message);
     res.status(500).json({ message: "Terjadi kesalahan server" });
-
   }
 }
 
-export async function deletSeller(req, res){
-
+async function deletSeller(req, res) {
   try {
-    const {id} = req.params;
+    const { id } = req.params;
 
-    await sellerModel.findOne({
-      where: {id}
-    });
+    await MasterSeller.destroy({ where: { id } });
 
-    res.status(201).json({
-      message: `Data seller sudah terhapus`    
-    });
-
+    res.status(201).json({ message: `Data seller sudah terhapus` });
   } catch (error) {
     console.error("Gagal mendaftar:", error.message);
     res.status(500).json({ message: "Terjadi kesalahan server" });
   }
 }
 
-export async function deletBuyer(req, res){
-
+async function deletBuyer(req, res) {
   try {
-    const {id} = req.params;
+    const { id } = req.params;
 
-    await buyerModel.findOne({
-      where: {id}
-    });
+    await MasterBuyer.destroy({ where: { id } });
 
-    res.status(201).json({
-      message: `Data buyer sudah terhapus`
-    });
-
+    res.status(201).json({ message: `Data buyer sudah terhapus` });
   } catch (error) {
     console.error("Gagal mendaftar:", error.message);
     res.status(500).json({ message: "Terjadi kesalahan server" });
   }
 }
 
-export async function listAuction(_req, res){
-
+async function listAuction(_req, res) {
   try {
-    
-    const dataAuction = await auctionModel.findAll();
-
-    res.status(200).json({
-      data: dataAuction
-    });
-
+    const dataAuction = await MasterAuction.findAll();
+    res.status(200).json({ data: dataAuction });
   } catch (error) {
     console.error("Gagal mendaftar:", error.message);
     res.status(500).json({ message: "Terjadi kesalahan server" });
-
   }
 }
 
-export async function statusToApproved(req, res){
-
+async function statusToApproved(req, res) {
   try {
     const { id } = req.query;
-    const { status } = req.body
-    
-    const dataAuction = await auctionModel.findOne({
+    const { status } = req.body;
+
+    const dataAuction = await MasterAuction.findOne({
       where: { id },
       attributes: ['status']
     });
 
     if (!dataAuction) {
-      res.status(404).json({ message: "Data auction tidak ditemukan." });
+      return res.status(404).json({ message: "Data auction tidak ditemukan." });
     }
 
-    if (dataAuction.status.trim().toLowerCase() === "Approved") {
+    if (dataAuction.status.trim().toLowerCase() === "approved") {
       return res.status(400).json({ message: "Auction sudah diset ke status Approved." });
     }
 
-    await auctionModel.update({
-      status
-    }, {
-      where: {id}
-    });
+    await MasterAuction.update({ status }, { where: { id } });
 
-    res.status(201).json({
-      message: "berhasil lelang dimulai"
-    });
-
+    res.status(201).json({ message: "berhasil lelang dimulai" });
   } catch (error) {
     console.error("Gagal mendaftar:", error.message);
     res.status(500).json({ message: "Terjadi kesalahan server" });
   }
 }
 
-export async function statusToReject(req, res){
+async function statusToReject(req, res) {
   try {
     const { id } = req.query;
-    const { status } = req.body
-    
-    const dataAuction = await auctionModel.findOne({
+    const { status } = req.body;
+
+    const dataAuction = await MasterAuction.findOne({
       where: { id },
       attributes: ['status']
     });
 
     if (!dataAuction) {
-      res.status(404).json({ message: "Data auction tidak ditemukan." });
+      return res.status(404).json({ message: "Data auction tidak ditemukan." });
     }
 
     if (dataAuction.status.trim().toLowerCase() === "rejected") {
-      res.status(400).json({ message: "Auction sudah diset ke status Rejected." });
+      return res.status(400).json({ message: "Auction sudah diset ke status Rejected." });
     }
 
-    if(dataAuction.status.trim().toLowerCase() !== "approved"){
-      res.status(400).json({message: "Data auction tidak berstatus approved."});
+    if (dataAuction.status.trim().toLowerCase() !== "approved") {
+      return res.status(400).json({ message: "Data auction tidak berstatus approved." });
     }
 
-    await auctionModel.update({
-      status
-    }, {
-      where: {id}
-    });
+    await MasterAuction.update({ status }, { where: { id } });
 
-    res.status(201).json({
-      message: "berhasil pembatalan pelelangan"
-    });
-
+    res.status(201).json({ message: "berhasil pembatalan pelelangan" });
   } catch (error) {
     console.error("Gagal mendaftar:", error.message);
     res.status(500).json({ message: "Terjadi kesalahan server" });
   }
 }
 
-export async function cekEmail(req, res){
+async function cekEmail(req, res) {
   try {
-
     const { email } = req.body;
 
     if (!email) {
@@ -260,7 +201,7 @@ export async function cekEmail(req, res){
       });
     }
 
-    const akun = await adminModel.findOne({where:{email}})
+    const akun = await MasterAdmin.findOne({ where: { email } });
 
     if (akun) {
       return res.status(200).json({
@@ -278,10 +219,22 @@ export async function cekEmail(req, res){
     console.error("Gagal mendaftar:", error.message);
     res.status(500).json({ message: "Terjadi kesalahan server" });
   }
-
 }
 
-export async function logout(_req, res){
+async function logout(_req, res) {
   res.clearCookie("dataJwt").send("Logout berhasil");
 }
 
+module.exports = {
+  registrasi,
+  login,
+  listSeller,
+  listBuyer,
+  deletSeller,
+  deletBuyer,
+  listAuction,
+  statusToApproved,
+  statusToReject,
+  cekEmail,
+  logout,
+};

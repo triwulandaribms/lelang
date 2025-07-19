@@ -1,14 +1,13 @@
-import jwt from "jsonwebtoken";
-import bcrypt from "bcryptjs";
-import { sellerModel } from "../models/sellerModel.js";
-import { auctionModel } from "../models/auctionModel.js";
+const jwt = require("jsonwebtoken");
+const bcrypt = require("bcryptjs");
+const MasterSeller = require("../models/sellerModel.js");
+const MasterAuction = require("../models/auctionModel.js");
 
-export async function registrasiSeller(req, res) {
+async function registrasiSeller(req, res) {
   try {
-
     const { name, email, password } = req.body;
 
-    const data = await sellerModel.findAll({ attributes: ["name", "email", "password", "role"] });
+    const data = await MasterSeller.findAll({ attributes: ["name", "email", "password", "role"] });
 
     if (data.some(seller => seller.email === email)) {
       return res.status(409).json({ message: "Email sudah terdaftar" });
@@ -23,11 +22,7 @@ export async function registrasiSeller(req, res) {
     const salt = await bcrypt.genSalt();
     const hash = await bcrypt.hash(password, salt);
 
-    await sellerModel.create({
-      name,
-      email,
-      password: hash,
-    });
+    await MasterSeller.create({ name, email, password: hash });
 
     return res.status(201).json({ message: "Akun seller berhasil dibuat." });
   } catch (error) {
@@ -36,61 +31,48 @@ export async function registrasiSeller(req, res) {
   }
 }
 
-export async function loginSeller(req, res){
-
+async function loginSeller(req, res) {
   try {
     const { email, password } = req.body;
+    const cekData = await MasterSeller.findAll();
 
-    const cekData = await sellerModel.findAll();
-    
-
-    if (cekData.length === 0){
-
-      return res.status(404).json({message: "data seller tidak ditemukan.Mohon lakukan registrasi terlebih dahulu"});
-
-    }else{
-
-      const cekEmail = await sellerModel.findOne({
+    if (cekData.length === 0) {
+      return res.status(404).json({ message: "data seller tidak ditemukan.Mohon lakukan registrasi terlebih dahulu" });
+    } else {
+      const cekEmail = await MasterSeller.findOne({
         where: { email },
         attributes: ['id', 'name', 'password', 'email', 'role']
       });
-  
+
       if (!cekEmail) {
         return res.status(404).json({ message: "Email tidak ditemukan" });
       }
-  
+
       const hash = await bcrypt.compare(password, cekEmail.password);
-  
       if (!hash) {
         return res.status(401).json({ message: "Password salah" });
       }
 
-  
       const dataJwt = jwt.sign({
         id: cekEmail.id,
         name: cekEmail.name,
         email: cekEmail.email,
         role: cekEmail.role,
-      },process.env.SECRET_KEY);
-  
-  
-      res.status(200).json({ message: "Berhasil login", token: `${dataJwt}`});
-  
-  
+      }, process.env.SECRET_KEY);
+
+      res.status(200).json({ message: "Berhasil login", token: dataJwt });
     }
   } catch (error) {
     res.status(500).json({ message: "Terjadi kesalahan server" });
   }
 }
 
-export async function resetPasswordSeller(req, res) {
-
+async function resetPasswordSeller(req, res) {
   try {
     const { id } = req.params;
     const { passwordBaru } = req.body;
 
-    const seller = await sellerModel.findByPk(id);
-
+    const seller = await MasterSeller.findByPk(id);
     if (!seller) {
       return res.status(404).json({ message: "Data seller tidak ditemukan." });
     }
@@ -98,63 +80,48 @@ export async function resetPasswordSeller(req, res) {
     const salt = await bcrypt.genSalt();
     const hash = await bcrypt.hash(passwordBaru, salt);
 
-    await sellerModel.update(
-      { password: hash }, { where: { id } });
+    await MasterSeller.update({ password: hash }, { where: { id } });
 
     res.status(200).json({ message: "Password berhasil direset." });
-      
   } catch (error) {
     console.error("Reset password error:", error.message);
     res.status(500).json({ message: "Terjadi kesalahan server" });
   }
 }
 
-export async function updateProfileSeller(req, res){
-
+async function updateProfileSeller(req, res) {
   try {
+    const { id } = req.params;
+    const { email, name } = req.body;
 
-   const {id} = req.params;
-   const { email, name } = req.body;
-
-   const cekData = await sellerModel.findAll({ attributes: ["name", "email", "password"] });
-
-    if(cekData){
+    const cekData = await MasterSeller.findAll({ attributes: ["name", "email", "password"] });
+    if (cekData) {
       if (cekData.some(seller => seller.email === email)) {
         return res.status(409).json({ message: "Email sudah terdaftar sebelumnya." });
       }
 
-    await sellerModel.update({
-        email,
-        name
-      }, {where: {id }});
-
+      await MasterSeller.update({ email, name }, { where: { id } });
       res.status(201).json({ message: "Profil berhasil diupdate." });
-  
-    }else{
+    } else {
       return res.status(404).json({ message: "Data seller tidak ditemukan." });
     }
-
   } catch (error) {
     console.error("error:", error.message);
     res.status(500).json({ message: "Terjadi kesalahan server" });
   }
 }
 
-export async function  createAuction(req, res){
+async function createAuction(req, res) {
   try {
-      
     const { nama_barang, deskripsi, harga_awal, waktu_mulai, waktu_akhir } = req.body;
 
-
-    if(!nama_barang || !deskripsi || !harga_awal || !waktu_mulai || !waktu_akhir){
-      return res.status(400).json({message:"field tidak boleh ada yang kosong"});
+    if (!nama_barang || !deskripsi || !harga_awal || !waktu_mulai || !waktu_akhir) {
+      return res.status(400).json({ message: "field tidak boleh ada yang kosong" });
     }
 
-    
     const startTime = new Date(waktu_mulai);
     const endTime = new Date(waktu_akhir);
 
-    
     if (isNaN(startTime) || isNaN(endTime)) {
       return res.status(400).json({ message: "Format waktu tidak valid" });
     }
@@ -163,12 +130,11 @@ export async function  createAuction(req, res){
       return res.status(400).json({ message: "Waktu akhir harus lebih besar dari waktu mulai." });
     }
 
-   
-    const dataAuction = await auctionModel.create({
+    const dataAuction = await MasterAuction.create({
       nama_barang,
       deskripsi,
       harga_awal,
-      waktu_mulai:startTime,
+      waktu_mulai: startTime,
       waktu_akhir: endTime
     });
 
@@ -176,10 +142,16 @@ export async function  createAuction(req, res){
       message: "Auction berhasil dibuat.",
       data: dataAuction
     });
-
   } catch (error) {
     console.error("Error creating auction:", error);
     return res.status(500).json({ message: "Terjadi kesalahan server." });
   }
 }
 
+module.exports = {
+  registrasiSeller,
+  loginSeller,
+  resetPasswordSeller,
+  updateProfileSeller,
+  createAuction,
+};
