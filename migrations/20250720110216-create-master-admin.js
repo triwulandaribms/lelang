@@ -19,7 +19,8 @@ module.exports = {
         type: Sequelize.STRING
       },
       create_at: {
-        type: Sequelize.DATE
+        type: Sequelize.DATE,
+        defaultValue: Sequelize.fn('NOW') 
       },
       updated_by: {
         type: Sequelize.STRING
@@ -31,14 +32,6 @@ module.exports = {
         type: Sequelize.STRING
       },
       deleted_at: {
-        type: Sequelize.DATE
-      },
-      createdAt: {
-        allowNull: false,
-        type: Sequelize.DATE
-      },
-      updatedAt: {
-        allowNull: false,
         type: Sequelize.DATE
       }
     });
