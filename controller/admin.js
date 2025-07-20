@@ -10,7 +10,6 @@ async function registrasi(req, res) {
     const { name, email, password } = req.body;
 
     const data = await adminModel.findAll({ attributes: ['name', 'email', 'password'] });
-    console.log("adminModel:", data);
 
     if (data.some(akun => akun.email == email)) {
       res.status(201).json({ message: "email sudah pernah untuk mendaftar" });
