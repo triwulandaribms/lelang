@@ -1,6 +1,6 @@
-const MasterBuyer = require('../models/buyerModel.js');
-const MasterAuctionBidding = require('../models/auctionBiddingModel.js');
-const MasterAuction = require('../models/auctionModel.js');
+const { buyerModel } = require('../models/buyerModel.js');
+const { auctionBiddingModel } = require('../models/auctionBiddingModel.js');
+const { auctionModel } = require('../models/auctionModel.js');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 
@@ -8,7 +8,7 @@ async function registrasiBuyer(req, res) {
   try {
     const { name, email, password } = req.body;
 
-    const data = await MasterBuyer.findAll({ attributes: ["name", "email", "password", "role"] });
+    const data = await buyerModel.findAll({ attributes: ["name", "email", "password", "role"] });
 
     if (data.some(seller => seller.email === email)) {
       return res.status(409).json({ message: "Email sudah terdaftar" });
@@ -23,7 +23,7 @@ async function registrasiBuyer(req, res) {
     const salt = await bcrypt.genSalt();
     const hash = await bcrypt.hash(password, salt);
 
-    await MasterBuyer.create({
+    await buyerModel.create({
       name,
       email,
       password: hash,
@@ -40,12 +40,12 @@ async function loginBuyer(req, res) {
   try {
     const { email, password } = req.body;
 
-    const cekData = await MasterBuyer.findAll();
+    const cekData = await buyerModel.findAll();
 
     if (cekData.length === 0) {
       return res.status(404).json({ message: "data seller tidak ditemukan.Mohon lakukan registrasi terlebih dahulu" });
     } else {
-      const cekEmail = await MasterBuyer.findOne({
+      const cekEmail = await buyerModel.findOne({
         where: { email },
         attributes: ['id', 'name', 'password', 'email', 'role']
       });
@@ -79,7 +79,7 @@ async function resetPasswordBuyer(req, res) {
     const { id } = req.params;
     const { passwordBaru } = req.body;
 
-    const buyer = await MasterBuyer.findByPk(id);
+    const buyer = await buyerModel.findByPk(id);
 
     if (!buyer) {
       return res.status(404).json({ message: "Data seller tidak ditemukan." });
@@ -88,7 +88,7 @@ async function resetPasswordBuyer(req, res) {
     const salt = await bcrypt.genSalt();
     const hash = await bcrypt.hash(passwordBaru, salt);
 
-    await MasterBuyer.update({ password: hash }, { where: { id } });
+    await buyerModel.update({ password: hash }, { where: { id } });
 
     res.status(200).json({ message: "Password berhasil direset." });
   } catch (error) {
@@ -102,14 +102,14 @@ async function updateProfileBuyer(req, res) {
     const { id } = req.params;
     const { email, name } = req.body;
 
-    const cekData = await MasterBuyer.findAll({ attributes: ["name", "email", "password"] });
+    const cekData = await buyerModel.findAll({ attributes: ["name", "email", "password"] });
 
     if (cekData) {
       if (cekData.some(seller => seller.email === email)) {
         return res.status(409).json({ message: "Email sudah terdaftar sebelumnya." });
       }
 
-      await MasterBuyer.update({ email, name }, { where: { id } });
+      await buyerModel.update({ email, name }, { where: { id } });
 
       res.status(201).json({ message: "Profil berhasil diupdate." });
     } else {
@@ -123,7 +123,7 @@ async function updateProfileBuyer(req, res) {
 
 async function listAuctionByApproved(_req, res) {
   try {
-    const approvedAuction = await MasterAuction.findAll({ where: { status: "approved" } });
+    const approvedAuction = await auctionModel.findAll({ where: { status: "approved" } });
 
     res.status(200).json({ data: approvedAuction });
   } catch (error) {
@@ -136,7 +136,7 @@ async function createAuctionBidding(req, res) {
   try {
     const { auctionId, harga_tawar } = req.body;
 
-    const cekStatusAuction = await MasterAuction.findOne({
+    const cekStatusAuction = await auctionModel.findOne({
       where: { id: auctionId, status: "approved" }
     });
 
@@ -144,7 +144,7 @@ async function createAuctionBidding(req, res) {
       return res.status(400).json({ message: "Auction belum disetujui atau approved." });
     }
 
-    const hargaTertinggi = await MasterAuctionBidding.findOne({
+    const hargaTertinggi = await auctionBiddingModel.findOne({
       where: { auctionId },
       order: [["harga_tawar", "DESC"]]
     });
@@ -155,7 +155,7 @@ async function createAuctionBidding(req, res) {
       });
     }
 
-    const dataAuctionBidding = await MasterAuctionBidding.create({ auctionId, harga_tawar });
+    const dataAuctionBidding = await auctionBiddingModel.create({ auctionId, harga_tawar });
 
     return res.status(201).json({
       message: "Penawaran berhasil dilakukan.",

@@ -1,15 +1,16 @@
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const MasterAdmin = require('../models/adminModel.js');
-const MasterSeller = require('../models/sellerModel.js');
-const MasterBuyer = require('../models/buyerModel.js');
-const MasterAuction = require('../models/auctionModel.js');
+const { adminModel } = require('../models/adminModel.js');
+const { sellerModel } = require('../models/sellerModel.js');
+const { buyerModel } = require('../models/buyerModel.js');
+const { auctionModel } = require('../models/auctionModel.js');
 
 async function registrasi(req, res) {
   try {
     const { name, email, password } = req.body;
 
-    const data = await MasterAdmin.findAll({ attributes: ['name', 'email', 'password'] });
+    const data = await adminModel.findAll({ attributes: ['name', 'email', 'password'] });
+    console.log("adminModel:", data);
 
     if (data.some(akun => akun.email == email)) {
       res.status(201).json({ message: "email sudah pernah untuk mendaftar" });
@@ -24,7 +25,7 @@ async function registrasi(req, res) {
       const salt = await bcrypt.genSalt();
       const hash = await bcrypt.hash(password, salt);
 
-      await MasterAdmin.create({
+      await adminModel.create({
         name,
         email,
         password: hash,
@@ -41,12 +42,12 @@ async function login(req, res) {
   try {
     const { email, password } = req.body;
 
-    const cekData = await MasterAdmin.findAll();
+    const cekData = await adminModel.findAll();
 
     if (cekData.length === 0) {
       return res.status(404).json({ message: "data admin tidak ditemukan.Mohon lakukan registrasi terlebih dahulu" });
     } else {
-      const cekEmail = await MasterAdmin.findOne({
+      const cekEmail = await adminModel.findOne({
         where: { email },
         attributes: ['id', 'name', 'password', 'email', 'role']
       });
@@ -78,7 +79,7 @@ async function login(req, res) {
 
 async function listSeller(_req, res) {
   try {
-    const dataSeller = await MasterSeller.findAll();
+    const dataSeller = await sellerModel.findAll();
     res.status(200).json({ data: dataSeller });
   } catch (error) {
     console.error("Gagal mendaftar:", error.message);
@@ -88,7 +89,7 @@ async function listSeller(_req, res) {
 
 async function listBuyer(_req, res) {
   try {
-    const dataBuyer = await MasterBuyer.findAll();
+    const dataBuyer = await buyerModel.findAll();
     res.status(200).json({ data: dataBuyer });
   } catch (error) {
     console.error("Gagal mendaftar:", error.message);
@@ -100,7 +101,7 @@ async function deletSeller(req, res) {
   try {
     const { id } = req.params;
 
-    await MasterSeller.destroy({ where: { id } });
+    await sellerModel.destroy({ where: { id } });
 
     res.status(201).json({ message: `Data seller sudah terhapus` });
   } catch (error) {
@@ -113,7 +114,7 @@ async function deletBuyer(req, res) {
   try {
     const { id } = req.params;
 
-    await MasterBuyer.destroy({ where: { id } });
+    await buyerModel.destroy({ where: { id } });
 
     res.status(201).json({ message: `Data buyer sudah terhapus` });
   } catch (error) {
@@ -124,7 +125,7 @@ async function deletBuyer(req, res) {
 
 async function listAuction(_req, res) {
   try {
-    const dataAuction = await MasterAuction.findAll();
+    const dataAuction = await auctionModel.findAll();
     res.status(200).json({ data: dataAuction });
   } catch (error) {
     console.error("Gagal mendaftar:", error.message);
@@ -137,7 +138,7 @@ async function statusToApproved(req, res) {
     const { id } = req.query;
     const { status } = req.body;
 
-    const dataAuction = await MasterAuction.findOne({
+    const dataAuction = await auctionModel.findOne({
       where: { id },
       attributes: ['status']
     });
@@ -150,7 +151,7 @@ async function statusToApproved(req, res) {
       return res.status(400).json({ message: "Auction sudah diset ke status Approved." });
     }
 
-    await MasterAuction.update({ status }, { where: { id } });
+    await auctionModel.update({ status }, { where: { id } });
 
     res.status(201).json({ message: "berhasil lelang dimulai" });
   } catch (error) {
@@ -164,7 +165,7 @@ async function statusToReject(req, res) {
     const { id } = req.query;
     const { status } = req.body;
 
-    const dataAuction = await MasterAuction.findOne({
+    const dataAuction = await auctionModel.findOne({
       where: { id },
       attributes: ['status']
     });
@@ -181,7 +182,7 @@ async function statusToReject(req, res) {
       return res.status(400).json({ message: "Data auction tidak berstatus approved." });
     }
 
-    await MasterAuction.update({ status }, { where: { id } });
+    await auctionModel.update({ status }, { where: { id } });
 
     res.status(201).json({ message: "berhasil pembatalan pelelangan" });
   } catch (error) {
@@ -201,7 +202,7 @@ async function cekEmail(req, res) {
       });
     }
 
-    const akun = await MasterAdmin.findOne({ where: { email } });
+    const akun = await adminModel.findOne({ where: { email } });
 
     if (akun) {
       return res.status(200).json({
