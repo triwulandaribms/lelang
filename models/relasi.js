@@ -1,4 +1,4 @@
-const sequelize = require("../config/db.js");
+const { sequelize } = require("../config/db.js");
 const { auctionModel } = require("./auctionModel.js");
 const { auctionBiddingModel } = require("./auctionBiddingModel.js");
 

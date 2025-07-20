@@ -1,7 +1,7 @@
 const express = require('express');
 const cookieParser = require('cookie-parser');
 const authMiddleware = require('./middleware/auth');
-
+const { syncDatabase } = require('./models/relasi.js');
 const {
   login,
   registrasi,
@@ -82,3 +82,5 @@ app.use('/api', router);
 app.listen(3000, () => {
   console.log('Server berjalan di port 3000.');
 });
+
+syncDatabase();
