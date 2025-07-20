@@ -46,16 +46,5 @@ const sequelizeInstance = new Sequelize(
   }
 );
 
-async function testConnection(){
-  try {
-    await sequelizeInstance.authenticate();
-    console.log('terhubung ke basis data');
-  } catch (error) {
-    console.error('Gagal terhubung ke basis data:', error.message);
-  }
-}
-
-testConnection();
-
 module.exports = { sequelize: sequelizeInstance };
 
