@@ -24,20 +24,25 @@ const auctionBiddingModel = sequelize.define(
       type: DataTypes.DECIMAL,
       allowNull: false,
     },
-    createdAt: {
-      allowNull: false,
+    create_at: {
       type: DataTypes.DATE,
       defaultValue: DataTypes.NOW,
     },
-    updatedAt: {
-      allowNull: false,
+    updated_by: {
+      type: DataTypes.STRING,
+    },
+    updated_at: {
       type: DataTypes.DATE,
-      defaultValue: DataTypes.NOW,
+    },
+    deleted_by: {
+      type: DataTypes.STRING,
+    },
+    deleted_at: {
+      type: DataTypes.DATE,
     },
   },
   {
     tableName: "auctionBidding",
-    timestamps: true,
   }
 );
 

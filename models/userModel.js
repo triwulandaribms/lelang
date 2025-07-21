@@ -1,8 +1,8 @@
 const  { sequelize }  = require("../config/db.js");
 const { DataTypes } = require("sequelize");
 
-const sellerModel = sequelize.define(
-  "Seller",
+const userModel = sequelize.define(
+  "User",
   {
     id: {
       type: DataTypes.INTEGER,
@@ -22,6 +22,10 @@ const sellerModel = sequelize.define(
       type: DataTypes.STRING,
       allowNull: false,
     },
+    role:{
+        type: DataTypes.ENUM("buyer", "seller"),
+        allowNull: false,
+    },
     create_at: {
       type: DataTypes.DATE,
       defaultValue: DataTypes.NOW,
@@ -40,10 +44,9 @@ const sellerModel = sequelize.define(
     },
   },
   {
-    tableName: "Seller",
-    timestamps: false,
+    tableName: "User",
   }
 );
 
 
-module.exports = { sellerModel };
+module.exports = { userModel };

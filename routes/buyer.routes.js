@@ -1,21 +1,19 @@
 const express = require('express');
 const {
-  registrasiBuyer,
-  loginBuyer,
+  loginUser,
   resetPasswordBuyer,
-  updateProfileBuyer,
-  listAuctionByApproved,
-  createAuctionBidding
-} = require('../controller/buyer.js');
+  listAuctionByApprovedByBuyer,
+  createAuctionBiddingByBuyer,
+  updateProfileUser
+} = require('../controller/user.js');
 const authMiddleware = require('../middleware/auth.js');
 
 const router = express.Router();
 
-router.post('/registrasi-buyer', authMiddleware, registrasiBuyer);
-router.post('/login-buyer', loginBuyer);
-router.put('/reset-password-buyer/:id', authMiddleware, resetPasswordBuyer);
-router.put('/update-profile-buyer/:id', authMiddleware, updateProfileBuyer);
-router.get('/list-auction', authMiddleware, listAuctionByApproved);
-router.post('/create-bidding', authMiddleware, createAuctionBidding);
+router.post('/login-buyer', loginUser);
+router.put('/reset-password-buyer/:email', authMiddleware, resetPasswordBuyer);
+router.put('/update-profile-buyer/:email', authMiddleware, updateProfileUser);
+router.get('/list-auction', authMiddleware,listAuctionByApprovedByBuyer);
+router.post('/create-bidding', authMiddleware, createAuctionBiddingByBuyer);
 
 module.exports = router;

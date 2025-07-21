@@ -1,19 +1,17 @@
 const express = require('express');
 const {
-  registrasiSeller,
-  loginSeller,
+  loginUser,
   resetPasswordSeller,
-  updateProfileSeller,
-  createAuction
-} = require('../controller/seller.js');
+  createAuctionBySeller,
+  updateProfileUser
+} = require('../controller/user.js');
 const authMiddleware = require('../middleware/auth.js');
 
 const router = express.Router();
 
-router.post('/registrasi-seller', authMiddleware, registrasiSeller);
-router.post('/login-seller', loginSeller);
+router.post('/login-seller', loginUser);
 router.put('/reset-password-seller/:id', authMiddleware, resetPasswordSeller);
-router.put('/update-profile-seller/:id', authMiddleware, updateProfileSeller);
-router.post('/create-auction', authMiddleware, createAuction);
+router.put('/update-profile-seller/:id', authMiddleware,updateProfileUser);
+router.post('/create-auction', authMiddleware, createAuctionBySeller);
 
 module.exports = router;

@@ -53,7 +53,6 @@ const auctionModel = sequelize.define(
   },
   {
     tableName: "Auction",
-    timestamps: false,
   }
 );
 

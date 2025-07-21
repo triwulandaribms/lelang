@@ -22,6 +22,10 @@ const adminModel = sequelize.define(
       type: DataTypes.STRING,
       allowNull: false,
     },
+    role:{
+      type: DataTypes.STRING,
+      defaultValue: "admin"
+    },
     create_at: {
       type: DataTypes.DATE,
       defaultValue: DataTypes.NOW,
@@ -41,7 +45,6 @@ const adminModel = sequelize.define(
   },
   {
     tableName: "Admin",
-    timestamps: false,
   }
 );
 

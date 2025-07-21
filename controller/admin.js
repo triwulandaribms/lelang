@@ -1,8 +1,7 @@
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const { adminModel } = require('../models/adminModel.js');
-const { sellerModel } = require('../models/sellerModel.js');
-const { buyerModel } = require('../models/buyerModel.js');
+const { userModel } = require('../models/userModel.js');
 const { auctionModel } = require('../models/auctionModel.js');
 
 async function registrasi(req, res) {
@@ -76,49 +75,62 @@ async function login(req, res) {
   }
 }
 
-async function listSeller(_req, res) {
+async function listUserByRole(req, res) {
   try {
-    const dataSeller = await sellerModel.findAll();
-    res.status(200).json({ data: dataSeller });
+    const { role } = req.params;
+
+    if (!['buyer', 'seller'].includes(role)) {
+      return res.status(400).json({ message: "Role harus 'buyer' atau 'seller'" });
+    }
+
+    const dataUser = await userModel.findAll({
+      where: { role },
+      attributes: ['id', 'name', 'email', 'role']
+    });
+
+    if (dataUser.length === 0) {
+      return res.status(404).json({ message: `Belum ada data untuk role ${role}` });
+    }
+
+    return res.status(200).json({ message: `List ${role}`, data: dataUser });
+
   } catch (error) {
-    console.error("Gagal mendaftar:", error.message);
+    console.error("Gagal mengambil daftar user:", error.message);
     res.status(500).json({ message: "Terjadi kesalahan server" });
   }
 }
 
-async function listBuyer(_req, res) {
+async function deleteUser(req, res) {
   try {
-    const dataBuyer = await buyerModel.findAll();
-    res.status(200).json({ data: dataBuyer });
-  } catch (error) {
-    console.error("Gagal mendaftar:", error.message);
-    res.status(500).json({ message: "Terjadi kesalahan server" });
-  }
-}
 
-async function deletSeller(req, res) {
-  try {
     const { id } = req.params;
+    const { role } = req.query; 
+    const user = req.user?.name || "system"; 
 
-    await sellerModel.destroy({ where: { id } });
+    if (role && !["buyer", "seller"].includes(role)) {
+      return res.status(400).json({ message: "Role tidak valid. Harus 'buyer' atau 'seller'." });
+    }
 
-    res.status(201).json({ message: `Data seller sudah terhapus` });
+    const dataUser = await userModel.findOne({
+      where: role ? { id, role } : { id }
+    });
+
+    if (!dataUser) {
+      return res.status(404).json({ message: "User tidak ditemukan." });
+    }
+
+    await userModel.update(
+      {
+        deleted_at: new Date(),
+        deleted_by: user
+      },
+      { where: { id } }
+    );
+
+    return res.status(200).json({ message: `User dengan id ${id} berhasil dihapus (soft delete).` });
   } catch (error) {
-    console.error("Gagal mendaftar:", error.message);
-    res.status(500).json({ message: "Terjadi kesalahan server" });
-  }
-}
-
-async function deletBuyer(req, res) {
-  try {
-    const { id } = req.params;
-
-    await buyerModel.destroy({ where: { id } });
-
-    res.status(201).json({ message: `Data buyer sudah terhapus` });
-  } catch (error) {
-    console.error("Gagal mendaftar:", error.message);
-    res.status(500).json({ message: "Terjadi kesalahan server" });
+    console.error("Gagal menghapus user:", error.message);
+    return res.status(500).json({ message: "Terjadi kesalahan server." });
   }
 }
 
@@ -228,10 +240,8 @@ async function logout(_req, res) {
 module.exports = {
   registrasi,
   login,
-  listSeller,
-  listBuyer,
-  deletSeller,
-  deletBuyer,
+  listUserByRole,
+  deleteUser,
   listAuction,
   statusToApproved,
   statusToReject,

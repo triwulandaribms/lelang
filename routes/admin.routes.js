@@ -2,26 +2,26 @@ const express = require('express');
 const {
   login,
   registrasi,
-  listSeller,
-  listBuyer,
+  listUserByRole,
   listAuction,
   statusToApproved,
   statusToReject,
-  deletSeller,
-  deletBuyer,
   cekEmail,
-  logout
+  logout,
+  deleteUser
 } = require('../controller/admin.js');
+const { registrasiUser } = require ('../controller/user.js');
 const authMiddleware = require('../middleware/auth.js');
 
 const router = express.Router();
 
+
 router.post('/registrasi', registrasi);
 router.post('/login', login);
-router.get('/list-seller', authMiddleware, listSeller);
-router.get('/list-buyer', authMiddleware, listBuyer);
-router.delete('/delete-seller/:id', authMiddleware, deletSeller);
-router.delete('/delete-buyer/:id', authMiddleware, deletBuyer);
+router.post('/registrasi-seller', authMiddleware, registrasiUser);
+router.post('/registrasi-buyer', authMiddleware, registrasiUser);
+router.get('/list-user/:role', authMiddleware, listUserByRole);
+router.put('/delete-user/:id', authMiddleware, deleteUser);
 router.get('/list-auction', authMiddleware, listAuction);
 router.put('/status-approved', authMiddleware, statusToApproved);
 router.put('/status-reject', authMiddleware, statusToReject);
