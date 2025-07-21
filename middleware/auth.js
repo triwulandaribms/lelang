@@ -13,10 +13,10 @@ function authMiddleware(req, res, next) {
     const cekToken = jwt.verify(token, process.env.SECRET_KEY);
     req.user = cekToken;
 
-    console.log('TOKEN:', cekToken);
     const path = req.baseUrl || '';
-    console.log('ROLE:', cekToken.role);
-    console.log('BASE URL:', path);
+    
+    // console.log('ROLE:', cekToken.role);
+    // console.log('BASE URL:', path);
 
     if (path.includes('/api/admin') && cekToken.role !== 'admin') {
       return res.status(403).json({ message: 'Akses ditolak. Hanya admin yang bisa mengakses.' });
