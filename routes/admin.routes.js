@@ -20,7 +20,7 @@ router.post('/registrasi', registrasi);
 router.post('/login', login);
 router.post('/registrasi-seller', authMiddleware, registrasiUser);
 router.post('/registrasi-buyer', authMiddleware, registrasiUser);
-router.get('/list-user/:role', authMiddleware, listUserByRole);
+router.get('/list-user', authMiddleware, listUserByRole);
 router.put('/delete-user/:id', authMiddleware, deleteUser);
 router.get('/list-auction', authMiddleware, listAuction);
 router.put('/status-approved', authMiddleware, statusToApproved);

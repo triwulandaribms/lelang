@@ -77,14 +77,18 @@ async function login(req, res) {
 
 async function listUserByRole(req, res) {
   try {
-    const { role } = req.params;
+    const { role } = req.query;
 
     if (!['buyer', 'seller'].includes(role)) {
-      return res.status(400).json({ message: "Role harus 'buyer' atau 'seller'" });
+      return res.status(400).json({ message: "role harus buyer atau seller" });
     }
 
     const dataUser = await userModel.findAll({
-      where: { role },
+      where: { 
+        role,
+        deleted_at: null,
+        deleted_by: null,
+       },
       attributes: ['id', 'name', 'email', 'role']
     });
 
@@ -100,7 +104,7 @@ async function listUserByRole(req, res) {
   }
 }
 
-async function deleteUser(req, res) {
+async function deleteUser(req, res) {    
   try {
 
     const { id } = req.params;
@@ -108,7 +112,7 @@ async function deleteUser(req, res) {
     const user = req.user?.name || "system"; 
 
     if (role && !["buyer", "seller"].includes(role)) {
-      return res.status(400).json({ message: "Role tidak valid. Harus 'buyer' atau 'seller'." });
+      return res.status(400).json({ message: "role tidak valid. Harus 'buyer' atau 'seller'." });
     }
 
     const dataUser = await userModel.findOne({
@@ -116,7 +120,7 @@ async function deleteUser(req, res) {
     });
 
     if (!dataUser) {
-      return res.status(404).json({ message: "User tidak ditemukan." });
+      return res.status(404).json({ message: "user tidak ditemukan." });
     }
 
     await userModel.update(
@@ -127,7 +131,7 @@ async function deleteUser(req, res) {
       { where: { id } }
     );
 
-    return res.status(200).json({ message: `User dengan id ${id} berhasil dihapus (soft delete).` });
+    return res.status(200).json({ message: `user dengan id ${id} berhasil dihapus (soft delete).` });
   } catch (error) {
     console.error("Gagal menghapus user:", error.message);
     return res.status(500).json({ message: "Terjadi kesalahan server." });

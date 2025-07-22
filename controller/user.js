@@ -10,26 +10,55 @@ async function registrasiUser(req, res) {
     const { name, email, password, role} = req.body;
 
    if (!['buyer', 'seller'].includes(role)) {
-    return res.status(400).json({ message: "Role harus 'buyer' atau 'seller'" });
+    return res.status(400).json({ message: "role harus buyer atau seller" });
   }
 
-  const cekEmail = await userModel.findOne({ where: { email } });
-  if (cekEmail) {
-    return res.status(409).json({ message: "Email sudah terdaftar" });
-  }
+ 
+  const cekPassword = await userModel.findAll({ 
+    where:{
+      deleted_at:null,
+      deleted_by:null,
+    },
+     attributes: ['password'] 
+    });
+    
+   
+  for (const user of cekPassword) {
 
-  const dataUser = await userModel.findAll({ attributes: ['password'] });
+    const resultPassword = await bcrypt.compare(password, user.password);
 
-  for (const user of dataUser) {
-    const cekPassword = await bcrypt.compare(password, user.password);
-    if (cekPassword) {
+    if (resultPassword) {
       return res.status(400).json({
-        message: "Password ini sudah pernah digunakan. Gunakan password lain."
+        message: "password ini sudah pernah digunakan."
       });
     }
   }
+
     const salt = await bcrypt.genSalt();
     const hash = await bcrypt.hash(password, salt);
+
+    const cekEmail = await userModel.findOne({ where: { email } });
+
+    if (cekEmail) {
+      if (cekEmail.deleted_at !== null || cekEmail.deleted_by !== null) {
+        await userModel.update(
+          {
+            name,
+            password: hash,
+            role,
+            deleted_at: null,
+            deleted_by: null
+          },
+          { where: { email } }
+        );
+
+        return res.status(200).json({
+          message: "Berhasil registrasi."
+        });
+      }
+        return res.status(400).json({ message: "email sudah pernah terdaftar." });
+   
+    }
 
     await userModel.create({
       name,
@@ -39,6 +68,7 @@ async function registrasiUser(req, res) {
     });
 
     return res.status(201).json({ message: "Berhasil registrasi." });
+
   } catch (error) {
     console.error("Gagal registrasi user:", error.message);
     return res.status(500).json({ message: "Terjadi kesalahan server" });
@@ -54,27 +84,32 @@ async function loginUser(req, res) {
     }
 
     if (!["buyer", "seller"].includes(role)) {
-      return res.status(400).json({ message: "Role harus buyer atau seller" });
+      return res.status(400).json({ message: "role harus buyer atau seller" });
     }
 
     const cekData = await userModel.findAll();
 
     if (cekData.length === 0) {
-      return res.status(404).json({ message: "data user tidak ditemukan.Mohon lakukan registrasi terlebih dahulu" });
+      return res.status(404).json({ message: "data user tidak ditemukan.mohon lakukan registrasi terlebih dahulu" });
     } else {
       const cekUser = await userModel.findOne({
-        where: { email, role },
+        where: { 
+          email, 
+          role,
+          deleted_at:null,
+          deleted_by:null 
+        },
         attributes: ['id', 'name', 'password', 'email', 'role']
       });
 
       if (!cekUser) {
-        return res.status(404).json({ message: "Email atau role tidak ditemukan" });
+        return res.status(404).json({ message: "email atau role tidak ditemukan" });
       }
 
       const hash = await bcrypt.compare(password, cekUser.password);
 
       if (!hash) {
-        return res.status(401).json({ message: "Password salah" });
+        return res.status(401).json({ message: "password salah" });
       }
 
       const dataJwt = jwt.sign({
@@ -100,25 +135,44 @@ async function resetPasswordBuyer(req, res) {
       return res.status(400).json({ message: "Password baru wajib diisi." });
     }
 
-    const user = await userModel.findOne({ where: { id, role: "buyer" } });
+    const user = await userModel.findOne({ 
+      where: { 
+        id, 
+        role: "buyer",
+        deleted_at:null,
+        deleted_by:null 
+      } 
+    });
 
     if (!user) {
-      return res.status(404).json({ message: "Buyer tidak ditemukan." });
+      return res.status(404).json({ message: "buyer tidak ditemukan." });
     }
 
     const cekPassword = await bcrypt.compare(passwordBaru, user.password);
     if (cekPassword) {
-      return res.status(400).json({ message: "Password baru tidak boleh sama dengan password lama." });
+      return res.status(400).json({ message: "password baru tidak boleh sama dengan password lama." });
     }
 
     const salt = await bcrypt.genSalt();
     const hash = await bcrypt.hash(passwordBaru, salt);
 
-    await userModel.update({ password: hash }, { where: { id, role: "buyer" } });
+    await userModel.update({ 
+      password: hash 
+    }, 
+    { 
+      where: { 
+        id, 
+        role: "buyer",
+        deleted_at:null,
+        deleted_by:null,
+       } 
+      }
+    );
 
-    return res.status(200).json({ message: "Password buyer berhasil direset." });
+    return res.status(200).json({ message: "password buyer berhasil direset." });
+
   } catch (error) {
-    console.error("Reset password buyer error:", error.message);
+    console.error("reset password buyer error:", error.message);
     return res.status(500).json({ message: "Terjadi kesalahan server." });
   }
 }
@@ -129,28 +183,43 @@ async function resetPasswordSeller(req, res) {
     const { passwordBaru } = req.body;
 
     if (!passwordBaru) {
-      return res.status(400).json({ message: "Password baru wajib diisi." });
+      return res.status(400).json({ message: "password baru wajib diisi." });
     }
 
-    const user = await userModel.findOne({ where: { id, role: "seller" } });
+    const user = await userModel.findOne({ 
+      where: { 
+        id, 
+        role: "seller",
+        deleted_at:null,
+        deleted_by:null, 
+      } 
+    });
 
     if (!user) {
-      return res.status(404).json({ message: "Seller tidak ditemukan." });
+      return res.status(404).json({ message: "seller tidak ditemukan." });
     }
 
     const cekPassword = await bcrypt.compare(passwordBaru, user.password);
     if (cekPassword) {
-      return res.status(400).json({ message: "Password baru tidak boleh sama dengan password lama." });
+      return res.status(400).json({ message: "password baru tidak boleh sama dengan password lama." });
     }
 
     const salt = await bcrypt.genSalt();
     const hash = await bcrypt.hash(passwordBaru, salt);
 
-    await userModel.update({ password: hash }, { where: { id, role: "seller" } });
+    await userModel.update({ password: hash }, { 
+      where: { 
+        id, 
+        role: "seller",
+        deleted_at:null,
+        deleted_by:null,
+       } 
+      });
 
-    return res.status(200).json({ message: "Password seller berhasil direset." });
+    return res.status(200).json({ message: "password seller berhasil direset." });
+
   } catch (error) {
-    console.error("Reset password seller error:", error.message);
+    console.error("reset password seller error:", error.message);
     return res.status(500).json({ message: "Terjadi kesalahan server." });
   }
 }
@@ -160,29 +229,45 @@ async function updateProfileUser(req, res) {
     const { id } = req.params;
     const { email, name, role } = req.body;
 
-    const user = await userModel.findOne({ where: { id, role } });
+    const user = await userModel.findOne({ 
+      where: { 
+          id, 
+          role,
+          deleted_at:null,
+          deleted_by:null 
+      } 
+    });
 
     if (!user) {
-      return res.status(404).json({ message: `User dengan role ${role} tidak ditemukan.` });
+      return res.status(404).json({ message: `user dengan role ${role} tidak ditemukan.` });
     }
 
     const cekEmail = await userModel.findOne({
       where: {
         email,
         id: { [Op.ne]: id },
+        deleted_at:null,
+        deleted_by:null,
       },
     });
 
     if (cekEmail) {
-      return res.status(409).json({ message: "Email sudah digunakan oleh user lain." });
+      return res.status(409).json({ message: "email sudah digunakan oleh user lain." });
     }
 
-    await userModel.update({ email, name }, { where: { id, role } });
+    await userModel.update({ email, name }, { 
+      where: { 
+        id, 
+        role,
+        deleted_at:null,
+        deleted_by:null,
+       } 
+      });
 
     return res.status(200).json({ message: `${role} berhasil update profil.` });
 
   } catch (error) {
-    console.error("Update profile error:", error.message);
+    console.error("update profile error:", error.message);
     return res.status(500).json({ message: "Terjadi kesalahan server." });
   }
 }
