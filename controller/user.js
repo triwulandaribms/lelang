@@ -156,18 +156,7 @@ async function resetPasswordBuyer(req, res) {
     const salt = await bcrypt.genSalt();
     const hash = await bcrypt.hash(passwordBaru, salt);
 
-    await userModel.update({ 
-      password: hash 
-    }, 
-    { 
-      where: { 
-        id, 
-        role: "buyer",
-        deleted_at:null,
-        deleted_by:null,
-       } 
-      }
-    );
+    await user.update({ password: hash });
 
     return res.status(200).json({ message: "password buyer berhasil direset." });
 
@@ -207,14 +196,7 @@ async function resetPasswordSeller(req, res) {
     const salt = await bcrypt.genSalt();
     const hash = await bcrypt.hash(passwordBaru, salt);
 
-    await userModel.update({ password: hash }, { 
-      where: { 
-        id, 
-        role: "seller",
-        deleted_at:null,
-        deleted_by:null,
-       } 
-      });
+    await user.update({ password: hash });
 
     return res.status(200).json({ message: "password seller berhasil direset." });
 
@@ -255,14 +237,7 @@ async function updateProfileUser(req, res) {
       return res.status(409).json({ message: "email sudah digunakan oleh user lain." });
     }
 
-    await userModel.update({ email, name }, { 
-      where: { 
-        id, 
-        role,
-        deleted_at:null,
-        deleted_by:null,
-       } 
-      });
+    await user.update({ email, name });
 
     return res.status(200).json({ message: `${role} berhasil update profil.` });
 
