@@ -7,67 +7,90 @@ const jwt = require('jsonwebtoken');
 
 async function registrasiUser(req, res) {
   try {
+
     const { name, email, password, role} = req.body;
+ 
+    let cekEmail= false;
+    let cekEmailSoftHapus= false;
+    let cekPassword  = false;
+    let emailUser = null;
 
    if (!['buyer', 'seller'].includes(role)) {
-    return res.status(400).json({ message: "role harus buyer atau seller" });
+    return res.status(400).json({ message: "Role harus buyer atau seller" });
   }
 
  
-  const cekPassword = await userModel.findAll({ 
-    where:{
-      deleted_at:null,
-      deleted_by:null,
-    },
-     attributes: ['password'] 
+  const dataUser = await userModel.findAll({ 
+     attributes: ['id','email','password','deleted_at','deleted_by'], 
     });
     
-   
-  for (const user of cekPassword) {
+  for(const user of dataUser){
+    if(user.email === email){
+      emailUser = user;
+      if(user.deleted_at === null && user.deleted_by === null){
+        cekEmail = true;
+      }else{
+        cekEmailSoftHapus = true;
+      }
+    }
 
-    const resultPassword = await bcrypt.compare(password, user.password);
-
-    if (resultPassword) {
-      return res.status(400).json({
-        message: "password ini sudah pernah digunakan."
-      });
+    if(user.deleted_at === null && user.deleted_by === null){
+      const cekPasswordSama = await bcrypt.compare(password, user.password);
+      if(cekPasswordSama){
+        cekPassword = true;
+        break;
+      }
     }
   }
 
-    const salt = await bcrypt.genSalt();
-    const hash = await bcrypt.hash(password, salt);
-
-    const cekEmail = await userModel.findOne({ where: { email } });
-
-    if (cekEmail) {
-      if (cekEmail.deleted_at !== null || cekEmail.deleted_by !== null) {
-        await userModel.update(
-          {
-            name,
-            password: hash,
-            role,
-            deleted_at: null,
-            deleted_by: null
-          },
-          { where: { email } }
-        );
-
-        return res.status(200).json({
-          message: "Berhasil registrasi."
-        });
-      }
-        return res.status(400).json({ message: "email sudah pernah terdaftar." });
-   
-    }
-
-    await userModel.create({
-      name,
-      email,
-      password: hash,
-      role,
+  if(cekPassword && cekEmail){
+    return res.status(400).json({
+      message: "Email dan password ini sudah pernah digunakan."
     });
+  }
 
-    return res.status(201).json({ message: "Berhasil registrasi." });
+  if(cekPassword){
+    return res.status(400).json({
+      message: "Password ini sudah pernah digunakan."
+    });
+  }
+  
+  if(cekEmail){
+    return res.status(400).json({
+      message: "Email sudah pernah terdaftar."
+    });
+  }
+
+  const salt = await bcrypt.genSalt();
+  const hash = await bcrypt.hash(password, salt);
+
+  if(cekEmailSoftHapus && emailUser){
+    await userModel.update(
+      {
+        name,
+        password:hash,
+        role,
+        deleted_at:null,
+        deleted_by:null,
+      },
+      { where: {email}}
+    );
+
+    return res.status(200).json({
+      message: "Berhasil registrasi (akun lama diaktifkan ulang)."
+    });
+  }
+
+  await userModel.create({
+    name,
+    email,
+    password:hash,
+    role,
+  });
+
+  return res.status(201).json({
+    message:"Berhasil registrasi."
+  });
 
   } catch (error) {
     console.error("Gagal registrasi user:", error.message);
@@ -141,7 +164,7 @@ async function resetPasswordBuyer(req, res) {
         role: "buyer",
         deleted_at:null,
         deleted_by:null 
-      } 
+      }
     });
 
     if (!user) {
@@ -181,7 +204,7 @@ async function resetPasswordSeller(req, res) {
         role: "seller",
         deleted_at:null,
         deleted_by:null, 
-      } 
+      }
     });
 
     if (!user) {
@@ -217,7 +240,7 @@ async function updateProfileUser(req, res) {
           role,
           deleted_at:null,
           deleted_by:null 
-      } 
+      }
     });
 
     if (!user) {
