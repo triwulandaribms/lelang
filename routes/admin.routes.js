@@ -8,13 +8,13 @@ const {
   statusToReject,
   cekEmail,
   logout,
-  deleteUser
+  deleteUser,
+  uploadFile
 } = require('../controller/admin.js');
 const { registrasiUser } = require ('../controller/user.js');
 const authMiddleware = require('../middleware/auth.js');
-
 const router = express.Router();
-
+const upload = require('../config/multer.js');
 
 router.post('/registrasi', registrasi);
 router.post('/login', login);
@@ -27,5 +27,6 @@ router.put('/status-approved', authMiddleware, statusToApproved);
 router.put('/status-reject', authMiddleware, statusToReject);
 router.post('/cekEmail', authMiddleware, cekEmail);
 router.post('/logout', authMiddleware, logout);
+router.post('/upload', upload.single('document'), uploadFile);
 
 module.exports = router;

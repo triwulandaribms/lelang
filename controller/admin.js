@@ -3,6 +3,8 @@ const jwt = require('jsonwebtoken');
 const { adminModel } = require('../models/adminModel.js');
 const { userModel } = require('../models/userModel.js');
 const { auctionModel } = require('../models/auctionModel.js');
+const { fileModel } = require('../models/fileModel.js');
+
 
 async function registrasi(req, res) {
   try {
@@ -84,11 +86,11 @@ async function listUserByRole(req, res) {
     }
 
     const dataUser = await userModel.findAll({
-      where: { 
+      where: {
         role,
         deleted_at: null,
         deleted_by: null,
-       },
+      },
       attributes: ['id', 'name', 'email', 'role']
     });
 
@@ -104,12 +106,12 @@ async function listUserByRole(req, res) {
   }
 }
 
-async function deleteUser(req, res) {    
+async function deleteUser(req, res) {
   try {
 
     const { id } = req.params;
-    const { role } = req.query; 
-    const user = req.user?.name || "system"; 
+    const { role } = req.query;
+    const user = req.user?.name || "system";
 
     if (role && !["buyer", "seller"].includes(role)) {
       return res.status(400).json({ message: "role tidak valid. Harus 'buyer' atau 'seller'." });
@@ -241,6 +243,28 @@ async function logout(_req, res) {
   res.clearCookie("dataJwt").send("Logout berhasil");
 }
 
+
+async function uploadFile  (req, res) {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ message: 'File tidak ditemukan' });
+    }
+
+    const { filename, path: filePath, mimetype } = req.file;
+
+    const data = await fileModel.create({
+      fileName: filename,
+      filePath,
+      mimeType: mimetype,
+    });
+
+    res.status(201).json({ message: 'Upload sukses', data });
+  } catch (error) {
+    res.status(500).json({ message: error.message || 'Upload gagal' });
+  }
+};
+
+
 module.exports = {
   registrasi,
   login,
@@ -251,4 +275,5 @@ module.exports = {
   statusToReject,
   cekEmail,
   logout,
+  uploadFile
 };
