@@ -4,6 +4,8 @@ const { adminModel } = require('../models/adminModel.js');
 const { userModel } = require('../models/userModel.js');
 const { auctionModel } = require('../models/auctionModel.js');
 const { fileModel } = require('../models/fileModel.js');
+const PDFDocument = require('pdfkit');
+const ExcelJS = require('exceljs');
 
 
 async function registrasi(req, res) {
@@ -243,7 +245,6 @@ async function logout(_req, res) {
   res.clearCookie("dataJwt").send("Logout berhasil");
 }
 
-
 async function uploadFile  (req, res) {
   try {
     if (!req.file) {
@@ -262,8 +263,53 @@ async function uploadFile  (req, res) {
   } catch (error) {
     res.status(500).json({ message: error.message || 'Upload gagal' });
   }
-};
+}
 
+async function filePdf (_req, res) {
+  try {
+    const users = await userModel.findAll();
+
+    const doc = new PDFDocument();
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', 'attachment; filename=users.pdf');
+
+    doc.pipe(res);
+    doc.fontSize(18).text('List Users', { underline: true });
+    doc.moveDown();
+
+    users.forEach((user, i) => {
+      doc.fontSize(12).text(`${i + 1}. ${user.name} - ${user.email} (${user.role})`);
+    });
+
+    doc.end();
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+}
+
+async function fileExcel(_req, res) {
+
+  const workbook = new ExcelJS.Workbook();
+  const worksheet = workbook.addWorksheet('User');
+
+  worksheet.columns = [
+    { header: 'ID', key: 'id', width: 10 },
+    { header: 'Name', key: 'name', width: 32 },
+    { header: 'Email', key: 'email', width: 32 },
+    { header: 'Role', key: 'role', width: 32}
+  ];
+
+  const users = await userModel.findAll();
+  users.forEach(user => {
+    worksheet.addRow(user.toJSON());
+  });
+
+  res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+  res.setHeader('Content-Disposition', 'attachment; filename=users.xlsx');
+
+  await workbook.xlsx.write(res);
+  res.end();
+}
 
 module.exports = {
   registrasi,
@@ -275,5 +321,7 @@ module.exports = {
   statusToReject,
   cekEmail,
   logout,
-  uploadFile
+  uploadFile,
+  filePdf,
+  fileExcel
 };

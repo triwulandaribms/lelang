@@ -1,21 +1,18 @@
 const express = require('express');
 const cookieParser = require('cookie-parser');
-const File = require('./models/fileModel.js');
-
 const { syncDatabase } = require('./models/relasi.js');
 const { createDatabase } = require('./scripts/createDatabase.js');
 const { sequelize } = require('./config/db.js');
-const path = require('path');
 const adminRoutes = require('./routes/admin.routes.js');
 const sellerRoutes = require('./routes/seller.routes.js');
 const buyerRoutes = require('./routes/buyer.routes.js');
+const path = require('path');
 
 const app = express();
 app.use(express.json());
 app.use(cookieParser());
 
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
-
 
 app.use('/api/admin', adminRoutes);
 app.use('/api/seller', sellerRoutes);
