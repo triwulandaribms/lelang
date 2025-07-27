@@ -81,33 +81,55 @@ async function login(req, res) {
 
 async function listUserByRole(req, res) {
   try {
-    const { role } = req.query;
+    const { role, page = 1, size = 10 } = req.query;
 
     if (!['buyer', 'seller'].includes(role)) {
       return res.status(400).json({ message: "role harus buyer atau seller" });
     }
 
-    const dataUser = await userModel.findAll({
+    const pageNumber = parseInt(page);
+    const pageSize = parseInt(size);
+
+    if (isNaN(pageNumber) || isNaN(pageSize) || pageNumber <= 0 || pageSize <= 0) {
+      return res.status(400).json({ message: "page dan size harus berupa angka positif" });
+    }
+
+    const offset = (pageNumber - 1) * pageSize;
+
+    const { count, rows } = await userModel.findAndCountAll({
       where: {
         role,
         deleted_at: null,
         deleted_by: null,
       },
-      attributes: ['id', 'name', 'email', 'role']
+      attributes: ['id', 'name', 'email', 'role'],
+      limit: pageSize,
+      offset,
     });
 
-    if (dataUser.length === 0) {
+    if (rows.length === 0) {
       return res.status(404).json({ message: `Belum ada data untuk role ${role}` });
     }
 
-    return res.status(200).json({ message: `List ${role}`, data: dataUser });
+    const totalPages = Math.ceil(count / pageSize);
+
+    return res.status(200).json({
+      message: `List ${role}`,
+      data: {
+        totalItems: count,
+        totalPages,
+        currentPage: pageNumber,
+        pageSize,
+        items: rows
+      }
+    });
 
   } catch (error) {
     console.error("Gagal mengambil daftar user:", error.message);
     res.status(500).json({ message: "Terjadi kesalahan server" });
   }
 }
-
+                                                                                                   
 async function deleteUser(req, res) {
   try {
 
